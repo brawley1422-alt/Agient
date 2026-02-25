@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGIent — Morning Briefing</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0b; --surface: #111114; --surface2: #18181d;
+    --border: #222228; --border2: #2e2e38;
+    --hot: #ff4d4d; --warm: #f5a623; --cold: #4a9eff;
+    --accent: #3d8ef0; --accent2: #2a6fd4;
+    --accent-glow: rgba(61,142,240,0.15); --accent-border: rgba(61,142,240,0.25);
+    --text: #f0f0f4; --text2: #9090a0; --text3: #55555f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.4; }
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(10,10,11,0.92); backdrop-filter: blur(12px); z-index: 100; flex-wrap: wrap; gap: 12px; }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; color: var(--text); }
+  .nav-logo span { color: var(--accent); }
+  .nav-date { font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+  .nav-stats { display: flex; gap: 24px; align-items: center; }
+  .nav-stat { text-align: right; }
+  .nav-stat-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: var(--accent); }
+  .nav-stat-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+  .main { display: grid; grid-template-columns: 260px 1fr 300px; min-height: calc(100vh - 61px); }
+  .sidebar { border-right: 1px solid var(--border); padding: 24px 0; position: sticky; top: 61px; height: calc(100vh - 61px); overflow-y: auto; }
+  .sidebar-section { padding: 0 20px; margin-bottom: 28px; }
+  .sidebar-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); margin-bottom: 12px; }
+  .stage-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+  .stage-item:hover { background: var(--surface2); }
+  .stage-item.active { background: var(--surface2); border-left: 2px solid var(--accent); }
+  .stage-name { font-size: 12px; color: var(--text2); }
+  .stage-item.active .stage-name { color: var(--text); }
+  .stage-count { font-size: 11px; font-family: 'Syne', sans-serif; font-weight: 700; color: var(--text3); background: var(--surface2); padding: 2px 7px; border-radius: 10px; }
+  .stage-item.active .stage-count { background: var(--accent); color: var(--bg); }
+  .pipeline-mini { padding: 16px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); margin: 0 20px; }
+  .pipeline-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); margin-bottom: 12px; }
+  .pipeline-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; gap: 2px; margin-bottom: 10px; }
+  .bar-segment { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .pipeline-legend { display: flex; flex-direction: column; gap: 6px; }
+  .legend-item { display: flex; align-items: center; justify-content: space-between; }
+  .legend-dot { width: 6px; height: 6px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+  .legend-name { font-size: 10px; color: var(--text3); flex: 1; }
+  .legend-num { font-size: 10px; color: var(--text2); font-family: 'Syne', sans-serif; font-weight: 600; }
+  .queue { padding: 28px 32px; overflow-y: auto; }
+  .queue-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .queue-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.5px; }
+  .queue-title span { color: var(--accent); }
+  .queue-subtitle { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .btn { padding: 8px 16px; border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.15s; border: none; letter-spacing: 0.5px; }
+  .btn-primary { background: var(--accent); color: #fff; font-weight: 500; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-linkedin { background: rgba(10,102,194,0.15); color: #4a9eff; border: 1px solid rgba(10,102,194,0.3); font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+  .btn-linkedin:hover { background: rgba(10,102,194,0.25); border-color: rgba(10,102,194,0.5); color: #6abaff; }
+  .card-linkedin { display: flex; margin-top: 10px; }
+  .card-linkedin a { font-size: 11px; color: #4a9eff; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 5px; background: rgba(10,102,194,0.08); border: 1px solid rgba(10,102,194,0.15); transition: all 0.15s; }
+  .card-linkedin a:hover { background: rgba(10,102,194,0.18); border-color: rgba(10,102,194,0.35); }
+  .prospect-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; transition: all 0.2s; cursor: pointer; animation: fadeSlideIn 0.3s ease forwards; opacity: 0; }
+  .prospect-card:nth-child(1) { animation-delay: 0.05s; } .prospect-card:nth-child(2) { animation-delay: 0.1s; } .prospect-card:nth-child(3) { animation-delay: 0.15s; } .prospect-card:nth-child(4) { animation-delay: 0.2s; }
+  @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .prospect-card:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .prospect-card.expanded { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-glow); }
+  .card-header { display: flex; align-items: center; padding: 16px 20px; gap: 14px; }
+  .prospect-avatar { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; flex-shrink: 0; color: #fff; }
+  .card-info { flex: 1; min-width: 0; }
+  .card-name { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { font-size: 10px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+  .score-badge { padding: 3px 10px; border-radius: 20px; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+  .score-hot { background: rgba(255,77,77,0.15); color: var(--hot); border: 1px solid rgba(255,77,77,0.3); }
+  .score-warm { background: rgba(245,166,35,0.15); color: var(--warm); border: 1px solid rgba(245,166,35,0.3); }
+  .score-cold { background: rgba(74,158,255,0.15); color: var(--cold); border: 1px solid rgba(74,158,255,0.3); }
+  .card-tenure { font-size: 9px; color: var(--text3); }
+  .card-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); animation: expandIn 0.2s ease; }
+  @keyframes expandIn { from { opacity: 0; } to { opacity: 1; } }
+  .card-body.visible { display: block; }
+  .card-section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); margin: 16px 0 8px; }
+  .hook-box { background: var(--accent-glow); border: 1px solid var(--accent-border); border-radius: 6px; padding: 10px 14px; font-size: 11px; color: var(--text2); line-height: 1.6; }
+  .hook-box strong { color: var(--accent); font-weight: 500; }
+  .message-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 14px; font-size: 12px; color: var(--text); line-height: 1.7; position: relative; }
+  .message-box textarea { width: 100%; background: transparent; border: none; outline: none; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); line-height: 1.7; resize: none; min-height: 80px; }
+  .message-actions { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+  .word-count { font-size: 10px; color: var(--text3); margin-left: auto; }
+  .flag-box { background: rgba(245,166,35,0.05); border: 1px solid rgba(245,166,35,0.15); border-radius: 6px; padding: 10px 14px; font-size: 11px; color: var(--warm); line-height: 1.6; }
+  .right-panel { border-left: 1px solid var(--border); padding: 24px 20px; position: sticky; top: 61px; height: calc(100vh - 61px); overflow-y: auto; }
+  .panel-section { margin-bottom: 28px; }
+  .panel-title { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); margin-bottom: 14px; }
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metric-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .metric-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: var(--text); line-height: 1; }
+  .metric-val.accent { color: var(--accent); } .metric-val.hot { color: var(--hot); } .metric-val.warm { color: var(--warm); }
+  .metric-label { font-size: 9px; color: var(--text3); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .activity-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .activity-text { font-size: 11px; color: var(--text2); line-height: 1.5; }
+  .activity-time { font-size: 9px; color: var(--text3); margin-top: 2px; }
+  .nurture-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); margin-bottom: 6px; }
+  .nurture-name { font-size: 11px; color: var(--text2); }
+  .nurture-days { font-size: 10px; font-family: 'Syne', sans-serif; font-weight: 600; color: var(--warm); }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--surface); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+  .tab { flex: 1; padding: 7px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); border-radius: 5px; cursor: pointer; transition: all 0.15s; }
+  .tab.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+  .status-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 4px; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; }
+  .chip-new { background: rgba(61,142,240,0.12); color: #6aabf7; }
+  .chip-sent { background: rgba(74,158,255,0.1); color: var(--cold); }
+  .chip-replied { background: rgba(245,166,35,0.1); color: var(--warm); }
+  .chip-conversation { background: rgba(245,166,35,0.15); color: #f0c060; }
+  .chip-bridge { background: rgba(255,120,50,0.12); color: #ff8844; }
+  .chip-requested { background: rgba(255,170,50,0.12); color: #ffaa44; }
+  .chip-active { background: rgba(0,200,120,0.12); color: #00c878; }
+  .chip-signed { background: rgba(0,200,120,0.18); color: #00e888; }
+  .chip-nurture { background: rgba(255,77,77,0.1); color: var(--hot); }
+  .stage-select { background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px; padding: 4px 8px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); cursor: pointer; outline: none; transition: border-color 0.15s; }
+  .stage-select:hover, .stage-select:focus { border-color: var(--accent); color: var(--text); }
+  .stage-select option { background: var(--surface2); }
+  ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  .sent-overlay { display: none; position: absolute; inset: 0; background: rgba(0,200,120,0.08); border-radius: 6px; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; color: #00c878; font-size: 13px; letter-spacing: 1px; }
+  .message-wrap { position: relative; } .message-wrap.sent .sent-overlay { display: flex; } .message-wrap.sent textarea { opacity: 0.2; pointer-events: none; }
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 500; align-items: center; justify-content: center; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; width: 100%; max-width: 600px; margin: 20px; box-shadow: 0 24px 60px rgba(0,0,0,0.6); animation: modalIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+  .modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; color: var(--text); }
+  .modal-title span { color: var(--accent); }
+  .modal-close { width: 28px; height: 28px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; line-height: 1; }
+  .modal-close:hover { border-color: var(--hot); color: var(--hot); }
+  .modal-body { padding: 24px; }
+  .upload-zone { border: 2px dashed var(--border2); border-radius: 10px; padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px; position: relative; overflow: hidden; }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-glow); }
+  .upload-zone.has-image { padding: 12px; border-style: solid; border-color: var(--accent-border); background: var(--accent-glow); }
+  .upload-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.5; }
+  .upload-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px; color: var(--text); margin-bottom: 4px; }
+  .upload-subtitle { font-size: 10px; color: var(--text3); line-height: 1.5; }
+  .upload-preview { display: none; max-width: 100%; max-height: 200px; border-radius: 6px; margin: 0 auto; }
+  .upload-zone.has-image .upload-preview { display: block; }
+  .upload-zone.has-image .upload-placeholder { display: none; }
+  .upload-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); }
+  .form-input, .form-select, .form-textarea { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 9px 12px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-select { cursor: pointer; } .form-select option { background: var(--surface2); }
+  .form-textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+  .form-input.ai-filled, .form-textarea.ai-filled, textarea.ai-filled { border-color: var(--accent-border); background: rgba(61,142,240,0.05); animation: fieldGlow 0.5s ease; }
+  @keyframes fieldGlow { 0% { box-shadow: 0 0 0 0 var(--accent-glow); } 50% { box-shadow: 0 0 12px 2px var(--accent-glow); } 100% { box-shadow: 0 0 0 0 transparent; } }
+  .parse-status { display: none; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 11px; line-height: 1.5; }
+  .parse-status.loading { display: flex; background: var(--accent-glow); border: 1px solid var(--accent-border); color: var(--accent); }
+  .parse-status.success { display: flex; background: rgba(0,200,120,0.08); border: 1px solid rgba(0,200,120,0.2); color: #00c878; }
+  .parse-status.error { display: flex; background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2); color: var(--hot); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--accent-border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+  .prospect-card.filtered-out { display: none; } .prospect-card.filter-in { animation: fadeSlideIn 0.25s ease forwards; }
+  .empty-state { text-align: center; padding: 60px 20px; animation: fadeSlideIn 0.3s ease forwards; }
+  .empty-icon { font-size: 36px; color: var(--text3); margin-bottom: 14px; opacity: 0.4; }
+  .empty-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 15px; color: var(--text2); margin-bottom: 6px; }
+  .empty-subtitle { font-size: 11px; color: var(--text3); }
+  .modal-divider { display: flex; align-items: center; gap: 12px; margin: 4px 0 20px; }
+  .modal-divider::before, .modal-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .modal-divider span { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); }
+  .nav-tab { padding: 6px 14px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); background: transparent; border: none; cursor: pointer; transition: all 0.15s; }
+  .nav-tab:hover { color: var(--text2); }
+  .nav-tab.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+  .sync-status { font-size: 9px; font-family: 'DM Mono', monospace; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+  .sync-saved { color: #4ecdc4; }
+  .sync-saving { color: var(--warm); }
+  .sync-local { color: var(--text3); }
+  .sync-error { color: var(--hot); }
+  .sync-loading { color: var(--text3); }
+  .voicelab-view, .summary-view { display: none; padding: 32px; max-width: 1400px; margin: 0 auto; }
+  .voicelab-view.active, .summary-view.active { display: block; }
+  .vl-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; margin-top: 20px; }
+  .vl-main { min-width: 0; }
+  .vl-chat { position: sticky; top: 85px; height: calc(100vh - 120px); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .vl-chat-header { padding: 14px 16px; border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px; }
+  .vl-chat-header span { color: var(--accent); }
+  .vl-chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .vl-chat-msg { max-width: 92%; padding: 10px 14px; border-radius: 8px; font-size: 11px; line-height: 1.6; white-space: pre-wrap; }
+  .vl-chat-msg.user { align-self: flex-end; background: rgba(61,142,240,0.1); border: 1px solid rgba(61,142,240,0.2); color: var(--text); }
+  .vl-chat-msg.ai { align-self: flex-start; background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); }
+  .vl-chat-msg.ai .copy-post-btn { display: inline-block; margin-top: 8px; font-size: 9px; color: var(--accent); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+  .vl-chat-msg.ai .copy-post-btn:hover { text-decoration: underline; }
+  .vl-chat-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border); }
+  .vl-chat-input { flex: 1; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 10px 12px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text); outline: none; resize: none; min-height: 40px; max-height: 100px; }
+  .vl-chat-input:focus { border-color: var(--accent); }
+  .vl-chat-empty { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; font-size: 11px; color: var(--text3); line-height: 1.6; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .summary-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+  .summary-stat-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 28px; line-height: 1; }
+  .summary-stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); margin-top: 6px; }
+  .summary-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .summary-section-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; margin-bottom: 12px; }
+  .summary-list { display: flex; flex-direction: column; gap: 8px; }
+  .summary-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--surface2); border-radius: 6px; font-size: 11px; color: var(--text2); }
+  .summary-item-name { font-weight: 500; color: var(--text); min-width: 120px; }
+  .summary-item-detail { color: var(--text3); flex: 1; }
+  .summary-ai-box { background: var(--surface2); border: 1px solid var(--accent-border); border-radius: 8px; padding: 16px; font-size: 12px; color: var(--text2); line-height: 1.7; white-space: pre-wrap; }
+  .summary-ai-loading { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text3); padding: 16px; }
+  .vl-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 22px; margin-bottom: 4px; }
+  .vl-title span { color: var(--accent); }
+  .vl-subtitle { font-size: 11px; color: var(--text3); margin-bottom: 28px; }
+  .vl-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .vl-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .vl-section-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; }
+  .vl-section-desc { font-size: 10px; color: var(--text3); margin-bottom: 12px; line-height: 1.5; }
+  .vl-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text); line-height: 1.7; resize: vertical; min-height: 120px; outline: none; }
+  .vl-textarea:focus { border-color: var(--accent); }
+  .vl-example { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; font-size: 11px; color: var(--text2); line-height: 1.6; position: relative; cursor: pointer; }
+  .vl-example.collapsed { max-height: 42px; overflow: hidden; }
+  .vl-example.collapsed::after { content: '...'; position: absolute; bottom: 8px; right: 36px; color: var(--text3); font-size: 12px; }
+  .vl-example .vl-tag { font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px; padding: 2px 6px; border-radius: 3px; margin-bottom: 6px; display: inline-block; }
+  .vl-tag.good { background: rgba(0,200,120,0.12); color: #00c878; }
+  .vl-tag.bad { background: rgba(255,77,77,0.12); color: var(--hot); }
+  .vl-example .vl-remove { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--text3); cursor: pointer; font-size: 12px; padding: 2px; }
+  .vl-example .vl-remove:hover { color: var(--hot); }
+  .vl-add-row { display: flex; gap: 8px; margin-top: 8px; }
+  .vl-add-row textarea { flex: 1; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 10px 12px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text); line-height: 1.5; resize: none; min-height: 40px; outline: none; }
+  .vl-add-row textarea:focus { border-color: var(--accent); }
+  .thumb-row { display: flex; align-items: center; gap: 4px; margin-left: 4px; }
+  .thumb-btn { background: none; border: 1px solid var(--border2); border-radius: 4px; padding: 3px 6px; font-size: 12px; cursor: pointer; transition: all 0.15s; line-height: 1; }
+  .thumb-btn:hover { border-color: var(--accent); }
+  .thumb-btn.voted { opacity: 0.4; pointer-events: none; }
+  .thumb-btn.voted-up { border-color: #00c878; background: rgba(0,200,120,0.1); }
+  .thumb-btn.voted-down { border-color: var(--hot); background: rgba(255,77,77,0.1); }
+  .tone-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 14px; margin: 10px 0; }
+  .tone-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .tone-badge { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+  .tone-positive { background: rgba(0,200,120,0.12); color: #00c878; }
+  .tone-neutral { background: rgba(74,158,255,0.12); color: var(--cold); }
+  .tone-cautious { background: rgba(245,166,35,0.12); color: var(--warm); }
+  .tone-cold { background: rgba(255,77,77,0.12); color: var(--hot); }
+  .tone-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); }
+  .tone-reading { font-size: 11px; color: var(--text2); line-height: 1.6; margin-bottom: 8px; }
+  .tone-suggestion { font-size: 11px; color: var(--accent); line-height: 1.6; padding-top: 8px; border-top: 1px solid var(--border); }
+  .tone-loading { font-size: 10px; color: var(--text3); display: flex; align-items: center; gap: 8px; padding: 10px 0; }
+  .thread { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+  .thread-msg { max-width: 88%; padding: 10px 14px; border-radius: 8px; font-size: 11px; line-height: 1.6; }
+  .thread-msg.sent { align-self: flex-end; background: rgba(61,142,240,0.1); border: 1px solid rgba(61,142,240,0.2); color: var(--text); }
+  .thread-msg.received { align-self: flex-start; background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); }
+  .thread-msg-label { font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); margin-bottom: 4px; }
+  .thread-msg.sent .thread-msg-label { color: var(--accent); }
+  .thread-msg.received .thread-msg-label { color: var(--warm); }
+  .reply-section { margin-top: 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px; }
+  .reply-section textarea { width: 100%; background: transparent; border: none; outline: none; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); line-height: 1.6; resize: none; min-height: 60px; }
+  .reply-actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  .phone-section { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .phone-section input { flex: 1; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 8px 12px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); outline: none; }
+  .phone-section input:focus { border-color: var(--accent); }
+  .phone-display { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(0,200,120,0.08); border: 1px solid rgba(0,200,120,0.2); border-radius: 6px; font-size: 12px; color: #00c878; }
+  .phone-display a { color: #00c878; text-decoration: none; } .phone-display a:hover { text-decoration: underline; }
+  .notes-section textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); line-height: 1.6; resize: vertical; min-height: 50px; outline: none; }
+  .notes-section textarea:focus { border-color: var(--accent); color: var(--text); }
+  .timeline { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; }
+  .timeline-entry { font-size: 9px; color: var(--text3); display: flex; align-items: center; gap: 4px; }
+  .timeline-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+  .timeline-entry.current .timeline-dot { background: var(--accent); } .timeline-entry.current { color: var(--accent); }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .card-footer-left { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 1400px) { .main { grid-template-columns: 220px 1fr 260px; } .vl-layout { grid-template-columns: 1fr 340px; } .nav { padding: 14px 20px; } }
+  @media (max-width: 1200px) { .main { grid-template-columns: 190px 1fr 220px; } .vl-layout { grid-template-columns: 1fr 300px; } .nav { padding: 12px 16px; } .nav-logo { font-size: 17px; } .nav-date { font-size: 9px; } .nav-stat-val { font-size: 13px; } .nav-stats { gap: 14px; } .nav-tab { font-size: 8px; padding: 5px 10px; letter-spacing: 0.5px; } .sidebar-label { font-size: 8px; } .stage-item { padding: 8px 14px; font-size: 10px; } .stage-count { font-size: 10px; } .panel-title { font-size: 8px; } .metric-box { padding: 10px; } .metric-val { font-size: 16px; } .metric-label { font-size: 7px; } .card-name { font-size: 12px; } .card-meta { font-size: 9px; } .status-chip { font-size: 8px; padding: 3px 8px; } .vl-title { font-size: 18px; } .vl-section { padding: 16px; } .vl-section-title { font-size: 12px; } .vl-textarea { font-size: 10px; padding: 10px; } .summary-stat-val { font-size: 22px; } }
+  @media (max-width: 1024px) { .main { grid-template-columns: 160px 1fr 190px; } .vl-layout { grid-template-columns: 1fr 260px; } .nav-stat { display: none; } .stage-item { padding: 6px 10px; font-size: 9px; } .right-panel { padding: 14px 10px; } .metric-grid { gap: 4px; } .metric-val { font-size: 14px; } .message-actions { flex-wrap: wrap; gap: 4px; } .message-actions .btn { font-size: 9px; padding: 4px 8px; } .summary-stat-val { font-size: 18px; } }
+  @media (max-width: 768px) { .nav { flex-direction: column; align-items: stretch; padding: 12px 14px; gap: 8px; } .nav > div:first-child { display: flex; justify-content: space-between; align-items: center; } .nav-date { display: none; } .nav-stats { display: none; } .main { grid-template-columns: 1fr; min-height: auto; } .sidebar { position: relative; top: auto; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 12px; overflow-x: auto; } .sidebar-section { display: flex; flex-wrap: wrap; gap: 4px; } .sidebar-label { width: 100%; margin-bottom: 4px; } .stage-item { padding: 6px 10px; font-size: 9px; } .right-panel { position: relative; top: auto; height: auto; border-left: none; border-top: 1px solid var(--border); padding: 14px; } main { padding: 8px 0; } .prospect-card { margin: 0 8px; } .card-header { padding: 12px; } .card-body { padding: 12px; } .card-right { flex-wrap: wrap; gap: 4px; } .message-actions { flex-wrap: wrap; gap: 4px; } .message-actions .btn { font-size: 9px; padding: 5px 8px; } .modal { width: 96%; max-height: 92vh; } .form-grid { grid-template-columns: 1fr; } .voicelab-view, .summary-view { padding: 14px; } .vl-layout { grid-template-columns: 1fr; } .vl-chat { position: relative; top: auto; height: 450px; margin-top: 16px; } .vl-title { font-size: 18px; } .vl-section { padding: 12px; } .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } .summary-stat { padding: 12px; } .summary-stat-val { font-size: 20px; } }
+  @media (max-width: 480px) { .nav-logo { font-size: 15px; } .nav-tab { font-size: 7px; padding: 4px 7px; } .summary-grid { grid-template-columns: 1fr 1fr; } .card-name { font-size: 11px; } .vl-chat { height: 380px; } .vl-chat-input-row { flex-direction: column; gap: 6px; } .upload-zone { padding: 20px; } .upload-placeholder { font-size: 10px; } }
+  .upload-source-btn.active { background: var(--accent) !important; color: white !important; border-color: var(--accent) !important; }
+  .debrief-channel { font-size: 10px !important; padding: 6px 12px !important; transition: all 0.15s; }
+  .debrief-channel.active { background: var(--accent) !important; color: white !important; border-color: var(--accent) !important; }
+  .debrief-channel:hover:not(.active) { border-color: var(--accent-border); color: var(--text); }
+  .tone-box.debrief-expanded .debrief-raw { display: block !important; }
+  .debrief-history-item { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 11px; cursor: default; }
+  .debrief-history-item:last-child { border-bottom: none; }
+  .debrief-history-channel { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 4px; }
+  .debrief-history-prospect { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 12px; color: var(--text); margin-bottom: 4px; }
+  .debrief-history-summary { font-size: 10px; color: var(--text2); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .debrief-history-time { font-size: 9px; color: var(--text3); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div>
+    <div class="nav-logo">AG<span>I</span>ent</div>
+    <div class="nav-date">THU — FEB 25, 2026 — MORNING BRIEFING</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:24px;">
+    <div style="display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px;">
+      <button class="nav-tab active" id="navPipeline" onclick="showView('pipeline')">Pipeline</button>
+      <button class="nav-tab" id="navDebrief" onclick="showView('debrief')">Debrief</button>
+      <button class="nav-tab" id="navVoiceLab" onclick="showView('voicelab')">Voice Lab</button>
+      <button class="nav-tab" id="navSummary" onclick="showView('summary')">Daily Summary</button>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center;">
+      <button class="nav-tab" onclick="exportData()" title="Download all data as backup">💾 Backup</button>
+      <button class="nav-tab" id="copyBackupBtn" onclick="copyBackupToClipboard()" title="Copy backup JSON to clipboard — paste into GitHub version">📋 Copy</button>
+      <button class="nav-tab" onclick="document.getElementById('importFile').click()" title="Restore from backup file">📂 Restore</button>
+      <button class="nav-tab" onclick="importFromClipboard()" title="Import backup from clipboard — paste from other version">📥 Paste</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
+      <span id="syncStatus" class="sync-status sync-loading">⏳ Loading...</span>
+    </div>
+    <div class="nav-stats">
+      <div class="nav-stat"><div class="nav-stat-val">0</div><div class="nav-stat-label">Tasks Today</div></div>
+      <div class="nav-stat"><div class="nav-stat-val">0</div><div class="nav-stat-label">In Pipeline</div></div>
+      <div class="nav-stat"><div class="nav-stat-val">—</div><div class="nav-stat-label">Reply Rate</div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main" id="pipelineView">
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Pipeline Stages</div>
+      <div class="stage-item active" data-filter="all" onclick="filterStage(this)"><span class="stage-name">All Prospects</span><span class="stage-count">0</span></div>
+      <div class="stage-item" data-filter="new" onclick="filterStage(this)"><span class="stage-name">New</span><span class="stage-count">0</span></div>
+      <div class="stage-item" data-filter="messaging" onclick="filterStage(this)"><span class="stage-name">Messaging</span><span class="stage-count">0</span></div>
+      <div class="stage-item" data-filter="bridge" onclick="filterStage(this)"><span class="stage-name">Bridge</span><span class="stage-count">0</span></div>
+      <div class="stage-item" data-filter="active" onclick="filterStage(this)"><span class="stage-name">Active Prospect</span><span class="stage-count">0</span></div>
+      <div class="stage-item" data-filter="signed" onclick="filterStage(this)"><span class="stage-name">Signed ✓</span><span class="stage-count">0</span></div>
+      <div class="stage-item" data-filter="nurture" onclick="filterStage(this)"><span class="stage-name">Nurture</span><span class="stage-count">0</span></div>
+    </div>
+    <div class="pipeline-mini">
+      <div class="pipeline-label">Funnel Health</div>
+      <div class="pipeline-bar">
+        <div class="bar-segment" id="bar-surfaced" style="width:0%; background: var(--accent); opacity:0.8;"></div>
+        <div class="bar-segment" id="bar-sent" style="width:0%; background: var(--cold); opacity:0.7;"></div>
+        <div class="bar-segment" id="bar-convo" style="width:0%; background: var(--warm); opacity:0.7;"></div>
+        <div class="bar-segment" id="bar-active" style="width:0%; background: var(--hot); opacity:0.7;"></div>
+      </div>
+      <div class="pipeline-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div><span class="legend-name">Surfaced</span><span class="legend-num" id="legend-surfaced">0</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cold)"></div><span class="legend-name">Outreach Sent</span><span class="legend-num" id="legend-sent">0</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--warm)"></div><span class="legend-name">In Conversation</span><span class="legend-num" id="legend-convo">0</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--hot)"></div><span class="legend-name">Active / Signed</span><span class="legend-num" id="legend-active">0</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER QUEUE -->
+  <main class="queue">
+    <div class="queue-header">
+      <div>
+        <div class="queue-title">Morning <span>Queue</span></div>
+        <div class="queue-subtitle">0 tasks — add your first prospect to get started</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="document.getElementById('csvImportInput').click()">📂 Import CSV</button>
+        <input type="file" id="csvImportInput" accept=".csv" style="display:none" onchange="importCSV(event)" />
+        <button class="btn btn-ghost">Export</button>
+        <button class="btn btn-primary" id="addProspectBtn">+ Add Prospect</button>
+      </div>
+    </div>
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📸</div>
+      <div class="empty-title">Your queue is empty</div>
+      <div class="empty-subtitle">Click "+ Add Prospect" and drop a LinkedIn screenshot to get started</div>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="right-panel">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'metrics')">Metrics</div>
+      <div class="tab" onclick="switchTab(this,'activity')">Activity</div>
+      <div class="tab" onclick="switchTab(this,'nurture')">Nurture</div>
+    </div>
+    <div id="tab-metrics">
+      <div class="panel-section"><div class="panel-title">This Week</div>
+        <div class="metric-grid">
+          <div class="metric-box"><div class="metric-val accent" id="m-surfaced">0</div><div class="metric-label">Surfaced</div></div>
+          <div class="metric-box"><div class="metric-val" id="m-sent">0</div><div class="metric-label">Sent</div></div>
+          <div class="metric-box"><div class="metric-val warm" id="m-replied">0</div><div class="metric-label">Replied</div></div>
+          <div class="metric-box"><div class="metric-val hot" id="m-bridged">0</div><div class="metric-label">Bridged</div></div>
+        </div>
+      </div>
+      <div class="panel-section"><div class="panel-title">All Time</div>
+        <div class="metric-grid">
+          <div class="metric-box"><div class="metric-val" id="m-pipeline">0</div><div class="metric-label">Total Pipeline</div></div>
+          <div class="metric-box"><div class="metric-val accent" id="m-replyrate">—</div><div class="metric-label">Reply Rate</div></div>
+          <div class="metric-box"><div class="metric-val" id="m-active">0</div><div class="metric-label">Active Prospects</div></div>
+          <div class="metric-box"><div class="metric-val hot" id="m-signed">0</div><div class="metric-label">Signed</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-activity" style="display:none;">
+      <div class="panel-section"><div class="panel-title">Recent Activity</div>
+        <div id="activityLog"><div style="text-align:center;padding:24px 0;font-size:11px;color:var(--text3);">No activity yet — add your first prospect to get started.</div></div>
+      </div>
+    </div>
+    <div id="tab-nurture" style="display:none;">
+      <div class="panel-section"><div class="panel-title">Nurture Queue — Coming Up</div>
+        <div id="nurtureLog"><div style="text-align:center;padding:24px 0;font-size:11px;color:var(--text3);">No nurture contacts yet.</div></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- VOICE LAB VIEW -->
+<div class="voicelab-view" id="voicelabView">
+  <div class="vl-title">Voice <span>Lab</span></div>
+  <div class="vl-subtitle">Train the AI to sound like you. Everything here feeds directly into AI Suggest.</div>
+  <div class="vl-layout">
+    <div class="vl-main">
+      <div class="vl-section">
+        <div class="vl-section-header"><div class="vl-section-title">Core Style Guide</div></div>
+        <div class="vl-section-desc">This is the main instruction set the AI follows. Edit it in plain English.</div>
+        <textarea class="vl-textarea" id="vl-style" style="min-height:200px;" oninput="saveVoiceLab()">Sound like texting a friend, not writing an email. Short punchy sentences. Fragments are good.
+
+Casual vocab: "dope", "heck yeah", "yessir", "very cool", "love that", "that's awesome". Never corporate language, never recruiter speak.
+
+Use their first name. Exclamation points are natural but not forced. 2-4 short sentences max. Think text message, not email.
+
+Lead with something personal about THEM. Never open with what you do or what you're offering. End with a low-pressure personal question — ask about their city, background, something from their profile. Never "are you open to opportunities?"
+
+Never pitch in M1. Just be a human connecting. Build rapport through shared experience before business ever comes up.
+
+Sometimes send thoughts as separate short messages (like texting). Drop the business thought, then a personal note, then a question.
+
+Don't ask "are you interested in an opportunity?" — ask thought-provoking questions like "ever thought about doing your own agency?"
+
+Use their life changes (relocation, frustration, new role) as natural transition points to bring up what you do. Never force it.
+
+Always end on something personal/warm, not business. Plant seeds and let them grow.
+
+CRITICAL: Never open with "I noticed you've been at [company] for X years" or "I see you have X years of experience" or ANY variation of commenting on their tenure/company as an opener. This is the most generic recruiter move on LinkedIn. Instead, find something SPECIFIC and HUMAN — their city, a shared interest, their headline, a post they made, a mutual connection, literally anything personal.
+
+WHO JOSH IS (CliftonStrengths — this drives everything):
+1. POSITIVITY — Josh is genuinely upbeat and energizing. His enthusiasm is real, not performative.
+2. DEVELOPER — Josh sees potential in people that they might not see in themselves.
+3. IDEATION — Josh thinks differently. He connects dots others miss, finds creative angles.
+4. COMPETITION — Josh wants to win and wants the people on his team to win.
+5. WOO (Winning Others Over) — Josh is a natural at meeting new people and building instant rapport.
+
+These strengths should inform EVERY message. This is not a sales persona — this is who Josh actually is.</textarea>
+      </div>
+      <div class="vl-section">
+        <div class="vl-section-header"><div class="vl-section-title">About Your Company</div></div>
+        <div class="vl-section-desc">Details about what you're offering. The AI will only bring these up when natural.</div>
+        <textarea class="vl-textarea" id="vl-company" oninput="saveVoiceLab()">Company: Resolve
+Model: 1099 agent model. 0 base, 75% commissions after 20k (70% prior).
+Remote — agents work from anywhere. No territory restrictions.
+Strong back office tech team — CEO Dan has had a vision for a while and it's coming to life.
+Framing: "Not for most people but incredible for the right fit."
+My angle: "I like more money in my pocket for the work that I do — especially when I'm doing all the work."
+I was President at FWF before this — went from 5 to 180 people. Have real credibility in the industry.</textarea>
+      </div>
+      <div class="vl-section">
+        <div class="vl-section-header"><div class="vl-section-title">✓ Messages That Worked</div></div>
+        <div class="vl-section-desc">Paste real messages you've sent that got good responses.</div>
+        <div id="vl-good-examples">
+          <div class="vl-example collapsed" onclick="if(!event.target.closest('.vl-remove'))this.classList.toggle('collapsed')"><div class="vl-tag good">Good</div><button class="vl-remove" onclick="removeExample(this)">✕</button>Michelle! Hope you've been well! How is the freight game treating you?</div>
+          <div class="vl-example collapsed" onclick="if(!event.target.closest('.vl-remove'))this.classList.toggle('collapsed')"><div class="vl-tag good">Good</div><button class="vl-remove" onclick="removeExample(this)">✕</button>Ever thought about doing your own agency? Things have been smooth at the new role - a lot less stressful than FWF. Tell me about the cali weather - make me jealous lol</div>
+          <div class="vl-example collapsed" onclick="if(!event.target.closest('.vl-remove'))this.classList.toggle('collapsed')"><div class="vl-tag good">Good</div><button class="vl-remove" onclick="removeExample(this)">✕</button>Ooh! That relocation could be good timing if it's something you truly wanted to do. All agents work remote if they choose, and we do not have any presence in Chicago yet. Congrats on the engagement! That is awesome.</div>
+          <div class="vl-example collapsed" onclick="if(!event.target.closest('.vl-remove'))this.classList.toggle('collapsed')"><div class="vl-tag good">Good</div><button class="vl-remove" onclick="removeExample(this)">✕</button>I like more money in my pocket for the work that I do - especially when I'm doing all the work</div>
+          <div class="vl-example collapsed" onclick="if(!event.target.closest('.vl-remove'))this.classList.toggle('collapsed')"><div class="vl-tag good">Good</div><button class="vl-remove" onclick="removeExample(this)">✕</button>Good time to get back to Chicago with the weather breaking though. Chicago summers are the best thing on earth</div>
+        </div>
+        <div class="vl-add-row">
+          <textarea id="vl-good-input" placeholder="Paste a message that worked well..."></textarea>
+          <button class="btn btn-primary" onclick="addExample('good')" style="align-self:flex-end;font-size:10px;padding:6px 12px;">+ Add</button>
+        </div>
+      </div>
+      <div class="vl-section">
+        <div class="vl-section-header"><div class="vl-section-title">✗ Messages to Avoid</div></div>
+        <div class="vl-section-desc">Paste AI suggestions that didn't sound like you.</div>
+        <div id="vl-bad-examples">
+          <div class="vl-example collapsed" onclick="if(!event.target.closest('.vl-remove'))this.classList.toggle('collapsed')"><div class="vl-tag bad">Avoid</div><button class="vl-remove" onclick="removeExample(this)">✕</button>Hey [name], I noticed you've been at [company] for [X years] — that's impressive! I'd love to connect.</div>
+          <div class="vl-example collapsed" onclick="if(!event.target.closest('.vl-remove'))this.classList.toggle('collapsed')"><div class="vl-tag bad">Avoid</div><button class="vl-remove" onclick="removeExample(this)">✕</button>I see you have over X years of experience in freight/logistics. Your background really caught my eye.</div>
+          <div class="vl-example collapsed" onclick="if(!event.target.closest('.vl-remove'))this.classList.toggle('collapsed')"><div class="vl-tag bad">Avoid</div><button class="vl-remove" onclick="removeExample(this)">✕</button>Any opening that leads with their company name + how long they've worked there. This is the most generic recruiter opener on LinkedIn.</div>
+        </div>
+        <div class="vl-add-row">
+          <textarea id="vl-bad-input" placeholder="Paste a bad AI suggestion or a message style you want to avoid..."></textarea>
+          <button class="btn btn-ghost" onclick="addExample('bad')" style="align-self:flex-end;font-size:10px;padding:6px 12px;border-color:var(--hot);color:var(--hot);">+ Add</button>
+        </div>
+      </div>
+      <div class="vl-section">
+        <div class="vl-section-header"><div class="vl-section-title">Quick Rules</div></div>
+        <div class="vl-section-desc">One rule per line.</div>
+        <textarea class="vl-textarea" id="vl-rules" oninput="saveVoiceLab()" style="min-height:100px;">never say "opportunity" or "position" in early messages
+NEVER open with "I noticed you've been at [company] for [X years]" or any variation
+never comment on their experience length or years in the industry as an opener
+always ask about their city or background
+reference shared industry experience when possible
+if they mention frustration with their current shop, lean into it gently
+use their life changes as natural transition points
+open with something PERSONAL — a shared interest, their city, a post they wrote, a mutual connection, their headline, ANYTHING except "I see you work at X"</textarea>
+      </div>
+      <div class="vl-section">
+        <div class="vl-section-header"><div class="vl-section-title">Resolve LinkedIn Posts</div></div>
+        <div class="vl-section-desc">Paste your company's LinkedIn posts here for context.</div>
+        <div id="vl-posts"></div>
+        <div class="vl-add-row">
+          <textarea id="vl-post-input" placeholder="Paste a Resolve LinkedIn post here..." style="min-height:60px;"></textarea>
+          <button class="btn btn-primary" onclick="addPost()" style="align-self:flex-end;font-size:10px;padding:6px 12px;">+ Add Post</button>
+        </div>
+      </div>
+      <div class="vl-section">
+        <div class="vl-section-header"><div class="vl-section-title">Your Writing & Personal Posts</div></div>
+        <div class="vl-section-desc">Paste your own LinkedIn posts, tweets, emails, texts — anything you've written that sounds like you.</div>
+        <div id="vl-personal"></div>
+        <div class="vl-add-row">
+          <textarea id="vl-personal-input" placeholder="Paste something you wrote..." style="min-height:60px;"></textarea>
+          <button class="btn btn-primary" onclick="addPersonal()" style="align-self:flex-end;font-size:10px;padding:6px 12px;">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="vl-chat">
+      <div class="vl-chat-header">Writing <span>Assistant</span></div>
+      <div class="vl-chat-messages" id="vl-chat-messages">
+        <div class="vl-chat-empty">Ask me to write LinkedIn posts,<br>Resolve page content, emails,<br>or anything else — in your voice.<br><br><span style="color:var(--accent);">Try: "Write a LinkedIn post about<br>why I chose the 1099 model"</span></div>
+      </div>
+      <div class="vl-chat-input-row">
+        <textarea class="vl-chat-input" id="vl-chat-input" placeholder="Write me a post about..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+        <button class="btn btn-primary" onclick="sendChat()" style="align-self:flex-end;padding:8px 14px;">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DEBRIEF VIEW -->
+<div class="voicelab-view" id="debriefView">
+  <div class="vl-title">Debrief <span>Station</span></div>
+  <div class="vl-subtitle">Dump any conversation — LinkedIn DMs, phone call recap, texts, anything. AI analyzes and assigns to a prospect.</div>
+  <div class="vl-layout" style="grid-template-columns:1fr 380px;">
+    <div class="vl-main">
+      <div class="vl-section" style="padding:16px 20px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost debrief-channel active" data-channel="linkedin" onclick="selectChannel(this)">💬 LinkedIn DM</button>
+          <button class="btn btn-ghost debrief-channel" data-channel="phone" onclick="selectChannel(this)">📞 Phone Call</button>
+          <button class="btn btn-ghost debrief-channel" data-channel="text" onclick="selectChannel(this)">📱 Text Message</button>
+          <button class="btn btn-ghost debrief-channel" data-channel="other" onclick="selectChannel(this)">📝 Other</button>
+        </div>
+      </div>
+      <div class="vl-section" style="margin-top:12px;">
+        <div class="vl-section-title" id="debrief-input-label">Paste your LinkedIn conversation</div>
+        <div class="vl-section-desc" id="debrief-input-hint">Copy the full DM thread and paste it below. The AI will figure out who said what.</div>
+        <textarea class="vl-textarea" id="debrief-input" style="min-height:200px;" placeholder="Paste conversation, type call notes, whatever you've got..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
+          <button class="btn btn-primary" onclick="analyzeDebrief()" id="debrief-analyze-btn">⚡ Analyze</button>
+          <button class="btn btn-ghost" onclick="clearDebrief()">Clear</button>
+        </div>
+      </div>
+      <div id="debrief-results" style="display:none;margin-top:16px;">
+        <div class="vl-section" style="margin-top:0;"><div class="vl-section-title">Analysis</div><div id="debrief-summary-box" class="tone-box" style="border-color:var(--accent-border);"></div></div>
+        <div class="vl-section" style="margin-top:12px;">
+          <div class="vl-section-title">Assign to Prospect</div>
+          <div id="debrief-auto-match" style="display:none;margin-bottom:10px;padding:10px 14px;border-radius:6px;background:rgba(61,142,240,0.08);border:1px solid var(--accent-border);font-size:11px;">
+            <span style="color:var(--accent);">🎯 Auto-detected:</span>
+            <strong id="debrief-match-name" style="color:var(--text);"></strong>
+            <button class="btn btn-primary" onclick="confirmAutoAssign()" style="font-size:9px;padding:4px 10px;margin-left:10px;">Assign</button>
+            <button class="btn btn-ghost" onclick="rejectAutoAssign()" style="font-size:9px;padding:4px 8px;margin-left:4px;">Pick Different</button>
+          </div>
+          <div id="debrief-manual-assign">
+            <select class="form-select" id="debrief-prospect-select" style="max-width:300px;"><option value="">— Select a prospect —</option></select>
+            <button class="btn btn-primary" onclick="assignDebrief()" style="margin-top:8px;">Save to Prospect</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vl-chat" style="height:calc(100vh - 120px);">
+      <div class="vl-chat-header">Recent <span>Debriefs</span></div>
+      <div class="vl-chat-messages" id="debrief-history" style="padding:12px;">
+        <div class="vl-chat-empty">Your debrief history will<br>appear here as you log<br>conversations.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY SUMMARY VIEW -->
+<div class="summary-view" id="summaryView">
+  <div class="vl-title">Daily <span>Summary</span></div>
+  <div class="vl-subtitle" id="summary-date"></div>
+  <div class="summary-grid" id="summary-stats"></div>
+  <div class="summary-section"><div class="summary-section-title">📊 Pipeline Movement</div><div class="summary-list" id="summary-movement"><div style="font-size:11px;color:var(--text3);padding:8px;">Loading...</div></div></div>
+  <div class="summary-section"><div class="summary-section-title">🔥 Prospects Needing Attention</div><div class="summary-list" id="summary-attention"><div style="font-size:11px;color:var(--text3);padding:8px;">Loading...</div></div></div>
+  <div class="summary-section"><div class="summary-section-title">💬 Messaging Performance</div><div class="summary-list" id="summary-messages"><div style="font-size:11px;color:var(--text3);padding:8px;">Loading...</div></div></div>
+  <div class="summary-section"><div class="summary-section-title">🧠 AI Coach — What's Working & What's Not</div><div id="summary-ai"><div class="summary-ai-loading"><div class="spinner" style="width:14px;height:14px;border-width:1.5px;"></div> Analyzing your pipeline...</div></div></div>
+</div>
+
+<!-- ADD PROSPECT MODAL -->
+<div class="modal-backdrop" id="addProspectModal" onclick="closeModalOnBackdrop(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add <span>Prospect</span></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button class="btn btn-ghost upload-source-btn active" id="srcLinkedIn" onclick="switchUploadSource('linkedin')" style="font-size:10px;padding:5px 12px;">📸 LinkedIn Screenshot</button>
+        <button class="btn btn-ghost upload-source-btn" id="srcResume" onclick="switchUploadSource('resume')" style="font-size:10px;padding:5px 12px;">📄 Resume</button>
+      </div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="screenshotInput" accept="image/*" style="display:none" />
+        <div class="upload-placeholder">
+          <div class="upload-icon">📸</div>
+          <div class="upload-title">Drop a LinkedIn screenshot here</div>
+          <div class="upload-subtitle">or click to browse — AI will extract name, title, company, location & generate a hook + draft message</div>
+        </div>
+        <img class="upload-preview" id="uploadPreview" />
+        <div class="upload-actions" id="uploadActions" style="display:none;">
+          <button class="btn btn-ghost" onclick="clearUpload(event)" style="font-size:10px;padding:5px 10px;">Remove</button>
+          <button class="btn btn-primary" onclick="parseScreenshot(event)" id="parseBtn" style="font-size:10px;padding:5px 10px;">⚡ Parse with AI</button>
+        </div>
+      </div>
+      <div class="upload-zone" id="resumeZone" style="display:none;">
+        <input type="file" id="resumeInput" accept="image/*,.pdf" style="display:none" />
+        <div class="upload-placeholder">
+          <div class="upload-icon">📄</div>
+          <div class="upload-title">Drop a resume here</div>
+          <div class="upload-subtitle">Screenshot or photo of resume — AI will extract name, experience, skills & assess freight fit</div>
+        </div>
+        <img class="upload-preview" id="resumePreview" />
+        <div class="upload-actions" id="resumeActions" style="display:none;">
+          <button class="btn btn-ghost" onclick="clearResume(event)" style="font-size:10px;padding:5px 10px;">Remove</button>
+          <button class="btn btn-primary" onclick="parseResume(event)" id="resumeParseBtn" style="font-size:10px;padding:5px 10px;">⚡ Parse Resume</button>
+        </div>
+      </div>
+      <div class="parse-status" id="parseStatus"><div class="spinner"></div><span id="parseStatusText">Analyzing screenshot...</span></div>
+      <div class="modal-divider"><span>Prospect Details</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="p-fname" type="text" placeholder="First name" /></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="p-lname" type="text" placeholder="Last name" /></div>
+        <div class="form-group full"><label class="form-label">LinkedIn Profile URL</label><input class="form-input" id="p-linkedin" type="url" placeholder="https://linkedin.com/in/..." /></div>
+        <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="p-title" type="text" placeholder="e.g. Freight Broker" /></div>
+        <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="p-company" type="text" placeholder="e.g. Coyote Logistics" /></div>
+        <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="p-location" type="text" placeholder="e.g. Chicago, IL" /></div>
+        <div class="form-group"><label class="form-label">Tenure</label><input class="form-input" id="p-tenure" type="text" placeholder="e.g. 2 yr" /></div>
+        <div class="form-group"><label class="form-label">Score</label><select class="form-select" id="p-score"><option value="cold" selected>❄️ Cold</option><option value="warm">⚡ Warm</option><option value="hot">🔥 Hot</option></select></div>
+        <div class="form-group"><label class="form-label">Stage</label><select class="form-select" id="p-stage"><option value="new">New</option><option value="messaging">Messaging</option><option value="bridge">Bridge</option><option value="active">Active Prospect</option><option value="signed">Signed</option><option value="nurture">Nurture</option></select></div>
+        <div class="form-group full"><label class="form-label">Personalization Hook</label><textarea class="form-textarea" id="p-hook" placeholder="What signal stood out?"></textarea></div>
+        <div class="form-group full"><label class="form-label">Draft Message</label><textarea class="form-textarea" id="p-msg" placeholder="Opening message draft..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addProspect()">Add to Queue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STAGES = {
+    new: { label: 'New', cls: 'chip-new', next: 'messaging', action: 'Mark Sent →' },
+    messaging: { label: 'Messaging', cls: 'chip-conversation', next: 'bridge', action: 'Send Message →' },
+    bridge: { label: 'Bridge', cls: 'chip-bridge', next: 'active', action: 'Send → Number Requested' },
+    active: { label: 'Active Prospect', cls: 'chip-active', next: 'signed', action: 'Mark Signed ✓' },
+    signed: { label: 'Signed ✓', cls: 'chip-signed', next: null, action: null },
+    nurture: { label: 'Nurture', cls: 'chip-nurture', next: 'new', action: 'Re-engage →' }
+  };
+  const SCORES = { hot: { badge: '🔥 Hot', cls: 'score-hot' }, warm: { badge: '⚡ Warm', cls: 'score-warm' }, cold: { badge: '❄️ Cold', cls: 'score-cold' } };
+  const AVATAR_COLORS = ['linear-gradient(135deg, #3d8ef0, #2a6fd4)','linear-gradient(135deg, #a855f7, #7c3aed)','linear-gradient(135deg, #f5a623, #d4831a)','linear-gradient(135deg, #ff4d4d, #c0392b)','linear-gradient(135deg, #00c878, #00956a)'];
+  const prospects = {};
+  let cardCounter = 1;
+  function now() { return new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }); }
+
+  function toggleCard(id) { const card = document.getElementById(id); const body = card.querySelector('.card-body'); card.classList.toggle('expanded'); body.classList.toggle('visible'); }
+
+  function renderCardBody(id) {
+    const p = prospects[id]; if (!p) return;
+    const card = document.getElementById(id); const body = card.querySelector('.card-body');
+    const stage = p.stage; const si = STAGES[stage];
+    const chip = card.querySelector('.status-chip');
+    if (chip) { Object.values(STAGES).forEach(s => chip.classList.remove(s.cls)); chip.classList.add(si.cls); chip.textContent = si.label; }
+    let html = '';
+    if (p.hook) { html += `<div class="card-section-label">Personalization Hook</div><div class="hook-box">${p.hook}</div>`; }
+    if (p.thread.length > 0) {
+      html += `<div class="card-section-label">Conversation</div><div class="thread">`;
+      p.thread.forEach(m => { const cls = m.type === 'sent' ? 'sent' : 'received'; const label = m.type === 'sent' ? 'You sent' : 'They replied'; html += `<div class="thread-msg ${cls}"><div class="thread-msg-label">${label}</div>${m.text}</div>`; });
+      html += `</div>`;
+    }
+    if (p.toneAnalysis) {
+      const ta = p.toneAnalysis; const badgeClass = ta.tone === 'positive' ? 'tone-positive' : ta.tone === 'cautious' ? 'tone-cautious' : ta.tone === 'cold' ? 'tone-cold' : 'tone-neutral';
+      html += `<div class="card-section-label">Tone Reading</div><div class="tone-box"><div class="tone-header"><span class="tone-badge ${badgeClass}">${ta.tone}</span><span class="tone-label">Their vibe</span></div><div class="tone-reading">${ta.reading}</div><div class="tone-suggestion">💡 ${ta.approach}</div></div>`;
+    }
+    if (p._toneLoading) { html += `<div class="tone-loading"><div class="spinner" style="width:12px;height:12px;border-width:1.5px;"></div> Reading their tone...</div>`; }
+    const showDraft = ['new', 'messaging'].includes(stage) || (stage === 'bridge' && !p.numberRequested);
+    if (showDraft) {
+      const draftLabel = stage === 'new' ? 'Draft Message' : stage === 'messaging' ? 'Draft Message' : 'Bridge Message';
+      html += `<div class="card-section-label">${draftLabel}</div>
+        <div style="margin-bottom:8px;"><input type="text" id="guidance-${id}" class="form-input" placeholder="Steer the AI: e.g. 'ask about his move to Chicago'" style="font-size:10px;padding:7px 10px;color:var(--text2);border-color:var(--border);" value="${p.guidance || ''}" oninput="saveGuidance('${id}')" /></div>
+        <div class="message-box"><textarea id="draft-${id}" oninput="updateDraft('${id}')">${p.draft || ''}</textarea></div>
+        <div class="message-actions">
+          <button class="btn btn-ghost" onclick="copyDraft('${id}')">Copy</button>
+          <button class="btn btn-ghost" onclick="suggestReply('${id}')" id="suggest-btn-${id}" style="color:var(--accent);border-color:var(--accent-border);">⚡ AI Suggest</button>
+          ${p._lastSuggestion ? `<div class="thumb-row"><button class="thumb-btn" onclick="thumbVote('${id}','up',this)" title="Good suggestion">👍</button><button class="thumb-btn" onclick="thumbVote('${id}','down',this)" title="Bad suggestion">👎</button></div>` : ''}
+          ${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener" onclick="copyDraft('${id}')">Open LinkedIn ↗</a>` : ''}
+          <button class="btn btn-primary" onclick="sendMessage('${id}')">${si.action || 'Send Message →'}</button>
+          ${stage === 'messaging' ? `<button class="btn btn-ghost" onclick="moveStage('${id}','bridge')" style="border-color:var(--warm);color:var(--warm);">→ Bridge</button>` : ''}
+          <button class="btn btn-ghost" onclick="moveStage('${id}','nurture')">Nurture</button>
+        </div>`;
+    }
+    if (stage === 'messaging') {
+      html += `<div class="card-section-label">Log Their Reply</div><div class="reply-section"><textarea id="reply-${id}" placeholder="Paste their reply here..."></textarea><div class="reply-actions"><button class="btn btn-primary" onclick="logReplyStay('${id}')">Log Reply</button></div></div>`;
+    }
+    if (stage === 'bridge' && p.numberRequested && !p.numberDeclined) {
+      html += `<div class="card-section-label" style="color:var(--warm);">⏳ Number Requested — Waiting</div>
+        <div class="reply-section"><textarea id="reply-${id}" placeholder="Paste their reply here..."></textarea><div class="reply-actions"><button class="btn btn-ghost" onclick="logReplyOnly('${id}')">Save Reply</button></div></div>
+        <div class="card-section-label">Enter Their Number</div>
+        <div class="phone-section"><input type="tel" id="phone-${id}" placeholder="Enter their number..." /><button class="btn btn-primary" onclick="savePhoneAndAdvance('${id}')" style="font-size:10px;padding:6px 12px;">Got Number → Active</button></div>
+        <div class="message-actions" style="margin-top:12px;">
+          ${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener">Check LinkedIn ↗</a>` : ''}
+          <button class="btn btn-ghost" onclick="declineNumber('${id}')" style="border-color:var(--warm);color:var(--warm);">Declined Number</button>
+          <button class="btn btn-ghost" onclick="moveStage('${id}','nurture')">Nurture</button>
+        </div>`;
+    }
+    if (stage === 'bridge' && p.numberDeclined) {
+      html += `<div class="card-section-label" style="color:var(--hot);">Number Declined — Draft M3</div>
+        <div style="margin-bottom:8px;"><input type="text" id="guidance-${id}" class="form-input" placeholder="Steer the AI" style="font-size:10px;padding:7px 10px;color:var(--text2);border-color:var(--border);" value="${p.guidance || ''}" oninput="saveGuidance('${id}')" /></div>
+        <div class="message-box"><textarea id="draft-${id}" oninput="updateDraft('${id}')">${p.draft || ''}</textarea></div>
+        <div class="message-actions">
+          <button class="btn btn-ghost" onclick="copyDraft('${id}')">Copy</button>
+          <button class="btn btn-ghost" onclick="suggestReply('${id}')" id="suggest-btn-${id}" style="color:var(--accent);border-color:var(--accent-border);">⚡ AI Suggest</button>
+          ${p._lastSuggestion ? `<div class="thumb-row"><button class="thumb-btn" onclick="thumbVote('${id}','up',this)">👍</button><button class="thumb-btn" onclick="thumbVote('${id}','down',this)">👎</button></div>` : ''}
+          ${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener" onclick="copyDraft('${id}')">Open LinkedIn ↗</a>` : ''}
+          <button class="btn btn-primary" onclick="sendM3AndNurture('${id}')">Send M3 → Nurture</button>
+        </div>`;
+    }
+    if (['active', 'signed'].includes(stage) && p.phone) { html += `<div class="card-section-label">Phone</div><div class="phone-display">📞 <a href="tel:${p.phone}">${p.phone}</a></div>`; }
+    if (['active', 'signed'].includes(stage)) { html += `<div class="message-actions" style="margin-top:12px;">${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}${si.action ? `<button class="btn btn-primary" onclick="advanceStage('${id}')">${si.action}</button>` : ''}</div>`; }
+    if (stage === 'nurture') { html += `<div class="message-actions" style="margin-top:12px;">${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}<button class="btn btn-primary" onclick="moveStage('${id}','new')">Re-engage → New</button></div>`; }
+    html += `<div class="card-section-label">Score</div><select class="stage-select" onchange="saveScore('${id}', this.value)" style="margin-bottom:10px;"><option value="cold" ${p.score === 'cold' ? 'selected' : ''}>❄️ Cold</option><option value="warm" ${p.score === 'warm' ? 'selected' : ''}>⚡ Warm</option><option value="hot" ${p.score === 'hot' ? 'selected' : ''}>🔥 Hot</option></select>`;
+    const debriefs = (p.debriefs || []);
+    if (debriefs.length > 0) {
+      html += `<div class="card-section-label">Debrief History (${debriefs.length})</div>`;
+      debriefs.slice().reverse().forEach(d => {
+        const channelIcons = { linkedin: '💬', phone: '📞', text: '📱', other: '📝' }; const icon = channelIcons[d.channel] || '📝';
+        const toneCls = d.tone === 'positive' ? 'tone-positive' : d.tone === 'cautious' ? 'tone-cautious' : d.tone === 'cold' ? 'tone-cold' : 'tone-neutral';
+        html += `<div class="tone-box" style="margin-bottom:8px;border-color:var(--border2);cursor:pointer;" onclick="this.classList.toggle('debrief-expanded')"><div class="tone-header"><span style="font-size:11px;">${icon} ${d.channelLabel || d.channel}</span><span class="tone-badge ${toneCls}" style="font-size:8px;">${d.tone || 'neutral'}</span><span style="font-size:9px;color:var(--text3);margin-left:auto;">${d.date || ''}</span></div><div class="tone-reading" style="margin-top:6px;">${d.summary || ''}</div>${d.approach ? `<div class="tone-suggestion" style="margin-top:6px;">💡 ${d.approach}</div>` : ''}${d.rawPreview ? `<div class="debrief-raw" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);white-space:pre-wrap;">${d.rawPreview}</div>` : ''}</div>`;
+      });
+    }
+    html += `<div class="card-section-label">Employment Status</div><select class="stage-select" onchange="saveEmpStatus('${id}', this.value)" style="margin-bottom:10px;"><option value="" ${!p.empStatus ? 'selected' : ''}>— Not set —</option><option value="current_agent" ${p.empStatus === 'current_agent' ? 'selected' : ''}>Current Agent (1099)</option><option value="w2_broker" ${p.empStatus === 'w2_broker' ? 'selected' : ''}>W2 Broker</option><option value="other" ${p.empStatus === 'other' ? 'selected' : ''}>Other</option></select>`;
+    html += `<div class="card-section-label">Notes</div><div class="notes-section"><textarea id="notes-${id}" placeholder="Call notes, gut feelings, next steps..." oninput="saveNotes('${id}')">${p.notes || ''}</textarea></div>`;
+    html += `<div class="card-section-label">Stage History</div><div class="timeline">`;
+    p.stageHistory.forEach((entry, i) => { const isCurrent = i === p.stageHistory.length - 1; html += `<div class="timeline-entry ${isCurrent ? 'current' : ''}"><div class="timeline-dot"></div>${STAGES[entry.stage]?.label || entry.stage} · ${entry.time}</div>`; });
+    html += `</div>`;
+    html += `<div class="card-footer"><div class="card-footer-left"><select class="stage-select" onchange="moveStage('${id}', this.value)">${Object.entries(STAGES).map(([k,v]) => `<option value="${k}" ${k === stage ? 'selected' : ''}>${v.label}</option>`).join('')}</select></div><button class="btn btn-ghost" onclick="deleteProspect('${id}')" style="font-size:9px;padding:4px 8px;color:var(--text3);border-color:var(--border);">Delete</button></div>`;
+    body.innerHTML = html;
+  }
+
+  function updateDraft(id) { const ta = document.getElementById('draft-' + id); if (ta) { prospects[id].draft = ta.value; persistAll(); } }
+  function saveNotes(id) { const ta = document.getElementById('notes-' + id); if (ta) { prospects[id].notes = ta.value; persistAll(); } }
+  function saveGuidance(id) { const el = document.getElementById('guidance-' + id); if (el) { prospects[id].guidance = el.value; persistAll(); } }
+  function saveEmpStatus(id, val) { prospects[id].empStatus = val; persistAll(); }
+  function saveScore(id, val) { const p = prospects[id]; p.score = val; const card = document.getElementById(id); const badge = card?.querySelector('.score-badge'); if (badge) { Object.values(SCORES).forEach(s => badge.classList.remove(s.cls)); const sc = SCORES[val] || SCORES.cold; badge.classList.add(sc.cls); badge.textContent = sc.badge; } persistAll(); }
+
+  function doCopy(text) { if (navigator.clipboard && navigator.clipboard.writeText) { return navigator.clipboard.writeText(text).catch(() => fallbackCopy(text)); } return fallbackCopy(text); }
+  function fallbackCopy(text) { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); return Promise.resolve(); }
+  function copyDraft(id) { const ta = document.getElementById('draft-' + id); if (!ta || !ta.value.trim()) return; doCopy(ta.value).then(() => { const card = document.getElementById(id); const btn = card?.querySelector('.message-actions .btn-ghost'); if (!btn) return; const orig = btn.textContent; btn.textContent = '✓ Copied!'; btn.style.color = 'var(--accent)'; setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500); }); }
+
+  function sendMessage(id) {
+    const p = prospects[id]; const stage = p.stage;
+    if (p.draft && p.draft.trim()) { p.thread.push({ type: 'sent', text: p.draft.trim() }); doCopy(p.draft.trim()); p.draft = ''; }
+    if (stage === 'new') { moveStage(id, 'messaging'); }
+    else if (stage === 'bridge' && !p.numberRequested) { p.numberRequested = true; logActivity(`${p.name}: Number requested — waiting for reply`, 'var(--accent)'); renderCardBody(id); persistAll(); }
+    else { renderCardBody(id); persistAll(); }
+  }
+
+  function logReplyStay(id) { const ta = document.getElementById('reply-' + id); if (!ta || !ta.value.trim()) return; const p = prospects[id]; const replyText = ta.value.trim(); p.thread.push({ type: 'received', text: replyText }); logActivity(`💬 Reply from ${p.name}`, 'var(--accent)'); renderCardBody(id); persistAll(); analyzeTone(id, replyText); }
+  function logReplyOnly(id) { const ta = document.getElementById('reply-' + id); if (!ta || !ta.value.trim()) return; const replyText = ta.value.trim(); prospects[id].thread.push({ type: 'received', text: replyText }); logActivity(`💬 Reply logged for ${prospects[id].name}`, 'var(--accent)'); renderCardBody(id); analyzeTone(id, replyText); }
+
+  function advanceStage(id) {
+    const p = prospects[id]; const stage = p.stage;
+    if (p.draft && p.draft.trim()) { p.thread.push({ type: 'sent', text: p.draft.trim() }); doCopy(p.draft.trim()); p.draft = ''; }
+    if (stage === 'bridge' && !p.numberRequested) { p.numberRequested = true; logActivity(`${p.name}: Number requested — waiting for reply`, 'var(--accent)'); renderCardBody(id); return; }
+    const next = STAGES[stage]?.next; if (next) moveStage(id, next);
+  }
+
+  function savePhoneAndAdvance(id) { const input = document.getElementById('phone-' + id); if (!input || !input.value.trim()) { input.style.borderColor = 'var(--hot)'; return; } prospects[id].phone = input.value.trim(); logActivity(`📞 Got number for ${prospects[id].name} — moving to Active`, 'var(--accent)'); moveStage(id, 'active'); }
+  function declineNumber(id) { const p = prospects[id]; p.numberDeclined = true; p.draft = ''; p.guidance = 'they declined the number — keep it light, leave the door open, no pressure'; logActivity(`${p.name}: Declined number — drafting M3`, 'var(--warm)'); renderCardBody(id); }
+  function sendM3AndNurture(id) { const p = prospects[id]; if (p.draft && p.draft.trim()) { p.thread.push({ type: 'sent', text: p.draft.trim() }); doCopy(p.draft.trim()); p.draft = ''; } logActivity(`${p.name}: M3 sent → moving to Nurture`, 'var(--warm)'); moveStage(id, 'nurture'); }
+
+  const JOSH_STYLE = `You are writing as Josh Brawley, a freight brokerage recruiter at Resolve. Write LinkedIn DMs in Josh's exact voice:\n\nVOICE RULES:\n- Sound like texting a friend, not writing an email. Short punchy sentences. Fragments OK.\n- Casual vocab: "dope", "heck yeah", "yessir", "very cool", "love that", "that's awesome". Never corporate.\n- Use their first name. 2-4 short sentences max.\n- Always end on something personal/warm, not business.\n\nCONVERSATION STRATEGY:\n- M1 (cold open): Lead with something personal about THEM. Never mention the opportunity.\n- M2 (they replied): Match their energy. Plant a seed like "ever thought about doing your own agency?"\n- Later: Build rapport. Weave in the opportunity ONLY when natural.\n- Bridge: "Would love to keep chatting - easier over text. You cool if I shoot you my number?"\n\nWHAT JOSH NEVER DOES:\n- Never says "opportunity", "position", "role" in early messages\n- Never asks "are you open to..." or "would you be interested in..."\n- Never uses bullet points or formal structure\n- Never writes more than 50 words in a single message\n\nABOUT RESOLVE (only mention when natural, never in M1):\n- 1099 agent model. 0 base, 75% commissions after 20k (70% prior).\n- Remote. No territory restrictions.\n- "Not for most people but incredible for the right fit."`;
+
+  async function suggestReply(id) {
+    const p = prospects[id]; if (!p) return;
+    const btn = document.getElementById('suggest-btn-' + id); if (btn) { btn.textContent = '⚡ Thinking...'; btn.disabled = true; }
+    let context = `Prospect: ${p.name}`; if (p.title) context += `, ${p.title}`; if (p.company) context += ` at ${p.company}`; if (p.location) context += `, ${p.location}`; if (p.tenure) context += ` (${p.tenure} tenure)`; if (p.hook) context += `\nHook: ${p.hook}`; if (p.notes) context += `\nNotes: ${p.notes}`;
+    context += `\nCurrent stage: ${STAGES[p.stage]?.label || p.stage}`;
+    if (p.thread.length > 0) { context += '\n\nConversation so far:'; p.thread.forEach(m => { context += m.type === 'sent' ? `\nJosh: ${m.text}` : `\n${p.fname}: ${m.text}`; }); }
+    const msgType = p.stage === 'new' ? 'first cold open message' : p.stage === 'messaging' ? `next message in the conversation` : p.stage === 'bridge' ? 'bridge message to get their phone number' : 'next message';
+    const guidance = p.guidance?.trim(); const guidancePrompt = guidance ? `\n\nJosh's direction for this message: "${guidance}" — follow this guidance closely.` : '';
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 300, system: window._joshStyle || JOSH_STYLE,
+          messages: [{ role: 'user', content: `${context}${guidancePrompt}\n\nWrite Josh's ${msgType} to ${p.fname}. Return ONLY the message text, nothing else.\n\nHARD RULE: Do NOT open with "I noticed you've been at [company]" or any variation.` }] }) });
+      const data = await response.json(); if (data.error) throw new Error(data.error.message);
+      const text = data.content.map(i => i.text || '').join('\n').trim();
+      const ta = document.getElementById('draft-' + id);
+      if (ta) { ta.value = text; p.draft = text; p._lastSuggestion = text; ta.classList.add('ai-filled'); setTimeout(() => ta.classList.remove('ai-filled'), 1500); setTimeout(() => renderCardBody(id), 200); }
+    } catch (err) { console.error('Suggest error:', err); const ta = document.getElementById('draft-' + id); if (ta) ta.placeholder = 'AI suggestion failed — write manually'; }
+    finally { if (btn) { btn.textContent = '⚡ AI Suggest'; btn.disabled = false; } }
+  }
+
+  function thumbVote(id, vote, btn) {
+    const p = prospects[id]; if (!p || !p._lastSuggestion) return;
+    const suggestion = p._lastSuggestion; const context = `[${STAGES[p.stage]?.label || p.stage} → ${p.name}]`;
+    if (vote === 'up') { const container = document.getElementById('vl-good-examples'); container.appendChild(createExampleDiv('good', 'Good', `${context} ${suggestion}`)); btn.classList.add('voted-up'); }
+    else { const container = document.getElementById('vl-bad-examples'); container.appendChild(createExampleDiv('bad', 'Avoid', `${context} ${suggestion}`)); btn.classList.add('voted-down'); }
+    const row = btn.closest('.thumb-row'); row.querySelectorAll('.thumb-btn').forEach(b => { if (!b.classList.contains('voted-up') && !b.classList.contains('voted-down')) b.classList.add('voted'); });
+    p._lastSuggestion = null; buildStylePrompt(); persistAll(); logActivity(`${vote === 'up' ? '👍' : '👎'} AI suggestion ${vote === 'up' ? 'approved' : 'flagged'} for ${p.name}`, vote === 'up' ? 'var(--accent)' : 'var(--warm)');
+  }
+
+  async function analyzeTone(id, replyText) {
+    const p = prospects[id]; if (!p) return; p._toneLoading = true; p.toneAnalysis = null; renderCardBody(id);
+    let convo = ''; p.thread.forEach(m => { convo += m.type === 'sent' ? `Josh: ${m.text}\n` : `${p.fname}: ${m.text}\n`; });
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400,
+          messages: [{ role: 'user', content: `You are a sales conversation analyst.\n\nProspect: ${p.name}, ${p.title || 'unknown'} at ${p.company || 'unknown'}\nStage: ${STAGES[p.stage]?.label || p.stage}\n\nConversation:\n${convo}\n\nTheir latest reply: "${replyText}"\n\nAnalyze their tone. Return ONLY JSON:\n{"tone":"positive|neutral|cautious|cold","reading":"2-3 sentences","approach":"1-2 sentences tactical advice"}` }] }) });
+      const data = await response.json(); if (data.error) throw new Error(data.error.message);
+      const text = data.content.map(i => i.text || '').join('\n'); const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+      p.toneAnalysis = parsed; if (parsed.approach && !p.guidance) { p.guidance = parsed.approach; }
+    } catch (err) { console.error('Tone analysis error:', err); p.toneAnalysis = { tone: 'neutral', reading: 'Could not analyze tone.', approach: 'Proceed naturally.' }; }
+    finally { p._toneLoading = false; renderCardBody(id); }
+  }
+
+  function deleteProspect(id, confirmed) {
+    const p = prospects[id]; if (!p) return;
+    if (!confirmed) { const card = document.getElementById(id); const btn = card?.querySelector('[onclick*="deleteProspect"]'); if (btn) { btn.textContent = 'Confirm Delete?'; btn.style.color = 'var(--hot)'; btn.style.borderColor = 'var(--hot)'; btn.setAttribute('onclick', `deleteProspect('${id}', true)`); setTimeout(() => { if (prospects[id]) { btn.textContent = 'Delete'; btn.style.color = 'var(--text3)'; btn.style.borderColor = 'var(--border)'; btn.setAttribute('onclick', `deleteProspect('${id}')`); } }, 3000); } return; }
+    const card = document.getElementById(id); if (card) { card.style.transition = 'opacity 0.2s, transform 0.2s'; card.style.opacity = '0'; card.style.transform = 'translateX(-20px)'; setTimeout(() => card.remove(), 200); }
+    delete prospects[id]; logActivity('🗑 ' + p.name + ' removed', 'var(--text3)'); updateSidebarCounts(); persistAll();
+    const af = document.querySelector('.stage-item.active'); if (af) filterStage(af);
+  }
+
+  function moveStage(id, newStage) {
+    const p = prospects[id]; if (!p || !STAGES[newStage] || p.stage === newStage) return;
+    const oldStage = p.stage; p.stage = newStage; p.stageHistory.push({ stage: newStage, time: now() });
+    logActivity(p.name + ': ' + (STAGES[oldStage]?.label) + ' → ' + STAGES[newStage].label, 'var(--accent)');
+    renderCardBody(id); updateSidebarCounts();
+    const activeFilter = document.querySelector('.stage-item.active'); if (activeFilter) filterStage(activeFilter);
+  }
+
+  function filterStage(el) {
+    document.querySelectorAll('.stage-item').forEach(i => i.classList.remove('active')); el.classList.add('active');
+    const filter = el.dataset.filter; const cards = document.querySelectorAll('.prospect-card'); let visibleCount = 0;
+    cards.forEach(card => { const p = prospects[card.id]; if (!p) return; const shouldShow = filter === 'all' || p.stage === filter;
+      if (shouldShow) { card.classList.remove('filtered-out'); card.classList.add('filter-in'); visibleCount++; }
+      else { card.classList.add('filtered-out'); card.classList.remove('filter-in'); card.classList.remove('expanded'); card.querySelector('.card-body')?.classList.remove('visible'); }
+    });
+    document.getElementById('emptyState').style.display = visibleCount === 0 ? 'block' : 'none'; updateQueueSubtitle(visibleCount, filter);
+  }
+
+  let currentFilter = 'all';
+  function updateQueueSubtitle(count, filter) {
+    currentFilter = filter || currentFilter; const subtitle = document.querySelector('.queue-subtitle');
+    const si = STAGES[currentFilter]; const label = si ? si.label : 'prospects';
+    subtitle.textContent = count === 0 ? (currentFilter === 'all' ? '0 prospects — add your first to get started' : '0 in ' + label) : count + ' ' + (currentFilter === 'all' ? 'prospects' : 'in ' + label);
+  }
+
+  function updateSidebarCounts() {
+    const counts = { all: 0 }; Object.keys(STAGES).forEach(k => counts[k] = 0);
+    Object.values(prospects).forEach(p => { if (counts.hasOwnProperty(p.stage)) counts[p.stage]++; counts.all++; });
+    document.querySelectorAll('.stage-item').forEach(item => { const f = item.dataset.filter; const el = item.querySelector('.stage-count'); if (el && counts.hasOwnProperty(f)) el.textContent = counts[f]; });
+    const navVals = document.querySelectorAll('.nav-stat-val');
+    if (navVals[0]) navVals[0].textContent = counts.all; if (navVals[1]) navVals[1].textContent = counts.all;
+    const totalWithSent = Object.values(prospects).filter(p => p.thread.some(m => m.type === 'sent')).length;
+    const totalWithReply = Object.values(prospects).filter(p => p.thread.some(m => m.type === 'received')).length;
+    if (navVals[2]) navVals[2].textContent = totalWithSent > 0 ? Math.round(totalWithReply / totalWithSent * 100) + '%' : '—';
+    if (counts.all > 0) {
+      const t = counts.all;
+      const setBar = (id, v) => { const el = document.getElementById(id); if (el) el.style.width = (v / t * 100) + '%'; };
+      setBar('bar-surfaced', counts.new || 0); setBar('bar-sent', counts.messaging || 0); setBar('bar-convo', counts.bridge || 0); setBar('bar-active', (counts.active || 0) + (counts.signed || 0));
+      const setLeg = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setLeg('legend-surfaced', counts.new || 0); setLeg('legend-sent', counts.messaging || 0); setLeg('legend-convo', counts.bridge || 0); setLeg('legend-active', (counts.active || 0) + (counts.signed || 0));
+    }
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    const totalMessaging = (counts.messaging || 0) + (counts.bridge || 0) + (counts.active || 0) + (counts.signed || 0);
+    set('m-surfaced', counts.all); set('m-sent', totalMessaging); set('m-replied', totalWithReply); set('m-bridged', counts.bridge || 0);
+    set('m-pipeline', counts.all); set('m-active', counts.active || 0); set('m-signed', counts.signed || 0);
+    const rateEl = document.getElementById('m-replyrate');
+    if (rateEl) rateEl.textContent = totalWithSent > 0 ? Math.round(totalWithReply / totalWithSent * 100) + '%' : '—';
+    if (counts.all === 0) document.getElementById('emptyState').style.display = 'block';
+  }
+
+  function logActivity(text, color) {
+    const log = document.getElementById('activityLog');
+    const ph = log.querySelector('div[style]'); if (ph && ph.textContent.includes('No activity')) ph.remove();
+    const item = document.createElement('div'); item.className = 'activity-item';
+    item.innerHTML = '<div class="activity-dot" style="background:' + color + '"></div><div><div class="activity-text">' + text + '</div><div class="activity-time">' + now() + '</div></div>';
+    log.prepend(item);
+  }
+
+  function switchTab(el, tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active');
+    ['metrics','activity','nurture'].forEach(t => document.getElementById('tab-'+t).style.display = 'none');
+    document.getElementById('tab-' + tab).style.display = 'block';
+  }
+
+  // Modal
+  function openModal() { document.getElementById('addProspectModal').classList.add('open'); document.getElementById('p-fname').focus(); }
+  function closeModal() { document.getElementById('addProspectModal').classList.remove('open'); clearUpload(null); clearResume(null); resetParseStatus(); switchUploadSource('linkedin'); }
+  function closeModalOnBackdrop(e) { if (e.target === document.getElementById('addProspectModal')) closeModal(); }
+  document.getElementById('addProspectBtn').onclick = openModal;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // Screenshot Upload
+  let uploadedImageBase64 = null;
+  let _uploadSource = 'linkedin';
+  const uploadZone = document.getElementById('uploadZone');
+  const screenshotInput = document.getElementById('screenshotInput');
+  const uploadPreview = document.getElementById('uploadPreview');
+  const uploadActions = document.getElementById('uploadActions');
+
+  function switchUploadSource(src) {
+    _uploadSource = src;
+    document.querySelectorAll('.upload-source-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(src === 'linkedin' ? 'srcLinkedIn' : 'srcResume').classList.add('active');
+    document.getElementById('uploadZone').style.display = src === 'linkedin' ? '' : 'none';
+    document.getElementById('resumeZone').style.display = src === 'resume' ? '' : 'none';
+    resetParseStatus();
+  }
+
+  uploadZone.addEventListener('click', e => { if (!e.target.closest('button')) screenshotInput.click(); });
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) handleFile(f); });
+  screenshotInput.addEventListener('change', () => { if (screenshotInput.files[0]) handleFile(screenshotInput.files[0]); });
+
+  function handleFile(file) { const r = new FileReader(); r.onload = () => { uploadPreview.src = r.result; uploadedImageBase64 = r.result.split(',')[1]; uploadZone.classList.add('has-image'); uploadActions.style.display = 'flex'; }; r.readAsDataURL(file); }
+  function clearUpload(e) { if (e) e.stopPropagation(); uploadPreview.src = ''; uploadedImageBase64 = null; uploadZone.classList.remove('has-image'); uploadActions.style.display = 'none'; screenshotInput.value = ''; }
+
+  // Resume upload
+  let resumeBase64 = null; let resumeMediaType = 'image/png';
+  const resumeZone = document.getElementById('resumeZone');
+  const resumeInput = document.getElementById('resumeInput');
+  const resumePreview = document.getElementById('resumePreview');
+  const resumeActions = document.getElementById('resumeActions');
+
+  resumeZone.addEventListener('click', e => { if (!e.target.closest('button')) resumeInput.click(); });
+  resumeZone.addEventListener('dragover', e => { e.preventDefault(); resumeZone.classList.add('dragover'); });
+  resumeZone.addEventListener('dragleave', () => resumeZone.classList.remove('dragover'));
+  resumeZone.addEventListener('drop', e => { e.preventDefault(); resumeZone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) handleResumeFile(f); });
+  resumeInput.addEventListener('change', () => { if (resumeInput.files[0]) handleResumeFile(resumeInput.files[0]); });
+
+  function handleResumeFile(file) {
+    const r = new FileReader();
+    if (file.type === 'application/pdf') { resumeMediaType = 'application/pdf'; r.onload = () => { resumeBase64 = r.result.split(',')[1]; resumePreview.src = ''; resumePreview.style.display = 'none'; const placeholder = resumeZone.querySelector('.upload-placeholder'); if (placeholder) { placeholder.querySelector('.upload-icon').textContent = '📄'; placeholder.querySelector('.upload-title').textContent = file.name; placeholder.querySelector('.upload-subtitle').textContent = 'PDF loaded — click Parse Resume'; placeholder.style.display = ''; } resumeZone.classList.add('has-image'); resumeActions.style.display = 'flex'; }; r.readAsDataURL(file); }
+    else { resumeMediaType = file.type || 'image/png'; r.onload = () => { resumePreview.src = r.result; resumePreview.style.display = ''; resumeBase64 = r.result.split(',')[1]; resumeZone.classList.add('has-image'); resumeActions.style.display = 'flex'; }; r.readAsDataURL(file); }
+  }
+
+  function clearResume(e) { if (e) e.stopPropagation(); resumePreview.src = ''; resumeBase64 = null; resumeZone.classList.remove('has-image'); resumeActions.style.display = 'none'; resumeInput.value = ''; const placeholder = resumeZone.querySelector('.upload-placeholder'); if (placeholder) { placeholder.querySelector('.upload-icon').textContent = '📄'; placeholder.querySelector('.upload-title').textContent = 'Drop a resume here'; placeholder.querySelector('.upload-subtitle').textContent = 'Screenshot or photo of resume'; } }
+  function resetParseStatus() { const ps = document.getElementById('parseStatus'); ps.className = 'parse-status'; ps.style.display = 'none'; }
+
+  // AI Parse Screenshot
+  async function parseScreenshot(e) {
+    if (e) e.stopPropagation(); if (!uploadedImageBase64) return;
+    const ps = document.getElementById('parseStatus'); const psText = document.getElementById('parseStatusText'); const parseBtn = document.getElementById('parseBtn');
+    ps.className = 'parse-status loading'; psText.textContent = 'Analyzing LinkedIn screenshot...'; parseBtn.disabled = true; parseBtn.textContent = 'Parsing...';
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+          messages: [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/png', data: uploadedImageBase64 } },
+            { type: 'text', text: 'Extract ONLY what you can clearly see in this LinkedIn screenshot. Do NOT guess. If a field is not visible, use empty string "".\n\nReturn ONLY a JSON object (no markdown):\n{"first_name":"","last_name":"","linkedin_url":"","title":"","company":"","location":"","tenure":"","score":"cold","hook":"","draft_message":""}\n\nRules: linkedin_url ONLY if visible on screen. tenure = total time in freight/logistics. score default "cold". hook only if specific signal visible. draft_message = short casual M1 in Josh voice, lead with their name + something personal. Never pitch. NEVER open with "I noticed you\'ve been at [company]".' }
+          ]}] }) });
+      const data = await response.json(); if (data.error) throw new Error(data.error.message);
+      const text = data.content.map(i => i.text || '').join('\n'); const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+      const fm = {'p-fname':parsed.first_name,'p-lname':parsed.last_name,'p-linkedin':parsed.linkedin_url,'p-title':parsed.title,'p-company':parsed.company,'p-location':parsed.location,'p-tenure':parsed.tenure,'p-hook':parsed.hook,'p-msg':parsed.draft_message};
+      let d = 0; for (const [fid,val] of Object.entries(fm)) { if (val) { setTimeout(() => { const el = document.getElementById(fid); el.value = val; el.classList.add('ai-filled'); setTimeout(() => el.classList.remove('ai-filled'), 1500); }, d); d += 80; } }
+      if (parsed.score) setTimeout(() => { document.getElementById('p-score').value = parsed.score; }, d);
+      ps.className = 'parse-status success'; psText.textContent = '✓ Profile parsed — review fields below.';
+    } catch (err) { ps.className = 'parse-status error'; psText.textContent = 'Parse failed — ' + (err.message || 'error') + '. Fill manually.'; }
+    finally { parseBtn.disabled = false; parseBtn.textContent = '⚡ Parse with AI'; }
+  }
+
+  // AI Parse Resume
+  async function parseResume(e) {
+    if (e) e.stopPropagation(); if (!resumeBase64) return;
+    const ps = document.getElementById('parseStatus'); const psText = document.getElementById('parseStatusText'); const btn = document.getElementById('resumeParseBtn');
+    ps.className = 'parse-status loading'; psText.textContent = 'Analyzing resume...'; btn.disabled = true; btn.textContent = 'Parsing...';
+    try {
+      const contentBlock = resumeMediaType === 'application/pdf' ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: resumeBase64 } } : { type: 'image', source: { type: 'base64', media_type: resumeMediaType, data: resumeBase64 } };
+      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+          messages: [{ role: 'user', content: [ contentBlock,
+            { type: 'text', text: 'Extract info from this resume for freight brokerage recruiting. Return ONLY JSON:\n{"first_name":"","last_name":"","title":"most recent","company":"most recent","location":"","tenure":"total years in freight/logistics/sales","score":"cold","hook":"what makes them interesting for freight recruiting","draft_message":"","emp_status":"current_agent|w2_broker|other"}\n\nExtract ONLY what is clearly on the resume. Empty string if not visible.' }
+          ]}] }) });
+      const data = await response.json(); if (data.error) throw new Error(data.error.message);
+      const text = data.content.map(i => i.text || '').join('\n');
+      let parsed; try { parsed = JSON.parse(text.replace(/```json|```/g, '').trim()); } catch (pe) { const jsonMatch = text.match(/\{[\s\S]*\}/); if (jsonMatch) parsed = JSON.parse(jsonMatch[0]); else throw new Error('Could not parse AI response'); }
+      const fm = {'p-fname':parsed.first_name,'p-lname':parsed.last_name,'p-title':parsed.title,'p-company':parsed.company,'p-location':parsed.location,'p-tenure':parsed.tenure,'p-hook':parsed.hook,'p-msg':parsed.draft_message};
+      let d = 0; for (const [fid,val] of Object.entries(fm)) { if (val) { setTimeout(() => { const el = document.getElementById(fid); el.value = val; el.classList.add('ai-filled'); setTimeout(() => el.classList.remove('ai-filled'), 1500); }, d); d += 80; } }
+      if (parsed.score) setTimeout(() => { document.getElementById('p-score').value = parsed.score; }, d);
+      ps.className = 'parse-status success'; psText.textContent = '✓ Resume parsed — review fields below.';
+    } catch (err) { console.error('Resume parse error:', err); ps.className = 'parse-status error'; psText.textContent = 'Parse failed — ' + (err.message || 'error'); }
+    finally { btn.disabled = false; btn.textContent = '⚡ Parse Resume'; }
+  }
+
+  // Add Prospect
+  function addProspect() {
+    const fname = document.getElementById('p-fname').value.trim(); const lname = document.getElementById('p-lname').value.trim();
+    if (!fname || !lname) { document.getElementById('p-fname').style.borderColor='var(--hot)'; document.getElementById('p-lname').style.borderColor='var(--hot)'; return; }
+    const linkedin = document.getElementById('p-linkedin').value.trim(); const title = document.getElementById('p-title').value.trim();
+    const company = document.getElementById('p-company').value.trim(); const location = document.getElementById('p-location').value.trim();
+    const tenure = document.getElementById('p-tenure').value.trim(); const score = document.getElementById('p-score').value;
+    const stage = document.getElementById('p-stage').value; const hook = document.getElementById('p-hook').value.trim(); const msg = document.getElementById('p-msg').value.trim();
+    const id = 'card' + cardCounter; const initials = ((fname || '?')[0] + ((lname || '')[0] || '')).toUpperCase();
+    const avatarBg = AVATAR_COLORS[cardCounter % AVATAR_COLORS.length]; const si = STAGES[stage] || STAGES.new; const sc = SCORES[score] || SCORES.warm;
+    prospects[id] = { name: fname + ' ' + lname, fname, lname, linkedin, title, company, location, tenure, score, stage, hook, draft: msg, phone: '', notes: '', guidance: '', empStatus: '', numberRequested: false, numberDeclined: false, toneAnalysis: null, thread: [], stageHistory: [{ stage, time: now() }], debriefs: [] };
+    const card = document.createElement('div'); card.className = 'prospect-card'; card.id = id;
+    card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + fname + ' ' + lname + '</div><div class="card-meta">' + [title, company, location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (tenure ? '<div class="card-tenure">' + tenure + ' tenure</div>' : '') + '</div></div><div class="card-body"></div>';
+    document.querySelector('.queue').appendChild(card); cardCounter++; renderCardBody(id);
+    ['p-fname','p-lname','p-linkedin','p-title','p-company','p-location','p-tenure','p-hook','p-msg'].forEach(fid => { const el = document.getElementById(fid); el.value = ''; el.style.borderColor = ''; });
+    document.getElementById('p-score').value = 'cold'; document.getElementById('p-stage').value = 'new';
+    closeModal(); logActivity(fname + ' ' + lname + ' added → ' + si.label, 'var(--accent)'); updateSidebarCounts(); document.getElementById('emptyState').style.display = 'none';
+    const af = document.querySelector('.stage-item.active'); if (af) filterStage(af);
+    setTimeout(() => { if (!card.classList.contains('filtered-out')) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.style.borderColor = 'var(--accent)'; setTimeout(() => { card.style.borderColor = ''; }, 1500); } }, 100);
+  }
+
+  // View Toggle
+  function showView(view) {
+    document.getElementById('pipelineView').style.display = view === 'pipeline' ? 'grid' : 'none';
+    document.getElementById('debriefView').classList.toggle('active', view === 'debrief');
+    document.getElementById('voicelabView').classList.toggle('active', view === 'voicelab');
+    document.getElementById('summaryView').classList.toggle('active', view === 'summary');
+    document.getElementById('navPipeline').classList.toggle('active', view === 'pipeline');
+    document.getElementById('navDebrief').classList.toggle('active', view === 'debrief');
+    document.getElementById('navVoiceLab').classList.toggle('active', view === 'voicelab');
+    document.getElementById('navSummary').classList.toggle('active', view === 'summary');
+    if (view === 'summary') generateSummary();
+    if (view === 'debrief') refreshDebriefHistory();
+  }
+
+  // Daily Summary
+  function generateSummary() {
+    const all = Object.values(prospects);
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    document.getElementById('summary-date').textContent = today;
+    const counts = {}; Object.keys(STAGES).forEach(k => counts[k] = 0); all.forEach(p => { if (counts.hasOwnProperty(p.stage)) counts[p.stage]++; });
+    const total = all.length; const totalSent = all.filter(p => p.thread.filter(m => m.type === 'sent').length > 0).length;
+    const totalReplied = all.filter(p => p.thread.filter(m => m.type === 'received').length > 0).length;
+    const replyRate = totalSent > 0 ? Math.round(totalReplied / totalSent * 100) : 0;
+    const avgMessages = total > 0 ? (all.reduce((sum, p) => sum + p.thread.length, 0) / total).toFixed(1) : 0;
+    document.getElementById('summary-stats').innerHTML = '<div class="summary-stat"><div class="summary-stat-val" style="color:var(--accent);">' + total + '</div><div class="summary-stat-label">Total Pipeline</div></div><div class="summary-stat"><div class="summary-stat-val" style="color:var(--text);">' + totalSent + '</div><div class="summary-stat-label">Messaged</div></div><div class="summary-stat"><div class="summary-stat-val" style="color:var(--warm);">' + replyRate + '%</div><div class="summary-stat-label">Reply Rate</div></div><div class="summary-stat"><div class="summary-stat-val" style="color:var(--cold);">' + avgMessages + '</div><div class="summary-stat-label">Avg Messages</div></div>';
+    let movementHtml = ''; Object.entries(STAGES).forEach(([key, stage]) => { const inStage = all.filter(p => p.stage === key); if (inStage.length === 0) return; movementHtml += '<div class="summary-item"><span class="status-chip ' + stage.cls + '" style="min-width:100px;text-align:center;">' + stage.label + '</span><span class="summary-item-detail">' + inStage.map(p => p.name).join(', ') + '</span><strong style="color:var(--text);margin-left:auto;">' + inStage.length + '</strong></div>'; });
+    document.getElementById('summary-movement').innerHTML = movementHtml || '<div style="font-size:11px;color:var(--text3);padding:8px;">No prospects in pipeline yet.</div>';
+    let attentionHtml = '';
+    all.filter(p => (p.score === 'hot' || p.score === 'warm') && ['new', 'messaging'].includes(p.stage)).forEach(p => { const msgCount = p.thread.filter(m => m.type === 'sent').length; attentionHtml += '<div class="summary-item"><span class="summary-item-name">' + p.name + '</span><span class="score-badge ' + (SCORES[p.score]?.cls) + '" style="font-size:8px;">' + (SCORES[p.score]?.badge) + '</span><span class="summary-item-detail">' + (p.stage === 'new' ? 'No message sent yet' : msgCount + ' messages sent') + '</span></div>'; });
+    all.filter(p => { if (p.thread.length === 0) return false; const last = p.thread[p.thread.length - 1]; return last.type === 'received' && ['messaging', 'bridge'].includes(p.stage); }).forEach(p => { attentionHtml += '<div class="summary-item"><span class="summary-item-name">' + p.name + '</span><span style="color:var(--hot);font-size:10px;">REPLY WAITING</span><span class="summary-item-detail">They replied — you need to respond</span></div>'; });
+    const nurtured = all.filter(p => p.stage === 'nurture'); if (nurtured.length > 0) { attentionHtml += '<div class="summary-item"><span class="summary-item-name" style="color:var(--text3);">' + nurtured.length + ' in Nurture</span><span class="summary-item-detail">' + nurtured.map(p => p.name).join(', ') + '</span></div>'; }
+    document.getElementById('summary-attention').innerHTML = attentionHtml || '<div style="font-size:11px;color:var(--text3);padding:8px;">No urgent items.</div>';
+    let msgHtml = ''; all.filter(p => p.thread.length > 0).sort((a, b) => b.thread.length - a.thread.length).forEach(p => { const sent = p.thread.filter(m => m.type === 'sent').length; const received = p.thread.filter(m => m.type === 'received').length; const toneCls = p.toneAnalysis?.tone === 'positive' ? 'tone-positive' : p.toneAnalysis?.tone === 'cautious' ? 'tone-cautious' : p.toneAnalysis?.tone === 'cold' ? 'tone-cold' : 'tone-neutral'; msgHtml += '<div class="summary-item"><span class="summary-item-name">' + p.name + '</span><span style="font-size:10px;color:var(--accent);">' + sent + ' sent</span><span style="font-size:10px;color:var(--warm);">' + received + ' received</span>' + (p.toneAnalysis ? '<span class="tone-badge ' + toneCls + '" style="font-size:8px;">' + p.toneAnalysis.tone + '</span>' : '') + '<span class="status-chip ' + (STAGES[p.stage]?.cls) + '" style="font-size:8px;margin-left:auto;">' + (STAGES[p.stage]?.label) + '</span></div>'; });
+    document.getElementById('summary-messages').innerHTML = msgHtml || '<div style="font-size:11px;color:var(--text3);padding:8px;">No conversations yet.</div>';
+    generateAICoaching(all);
+  }
+
+  async function generateAICoaching(all) {
+    const container = document.getElementById('summary-ai');
+    container.innerHTML = '<div class="summary-ai-loading"><div class="spinner" style="width:14px;height:14px;border-width:1.5px;"></div> Analyzing your pipeline...</div>';
+    if (all.length === 0) { container.innerHTML = '<div class="summary-ai-box">Add some prospects to get AI coaching insights.</div>'; return; }
+    let context = 'Josh\'s recruiting pipeline summary:\n';
+    const counts = {}; Object.keys(STAGES).forEach(k => counts[k] = 0); all.forEach(p => { if (counts.hasOwnProperty(p.stage)) counts[p.stage]++; });
+    Object.entries(counts).forEach(([k, v]) => { if (v > 0) context += '- ' + (STAGES[k]?.label) + ': ' + v + '\n'; });
+    context += '\nDetailed:\n'; all.forEach(p => { const sent = p.thread.filter(m => m.type === 'sent').length; const received = p.thread.filter(m => m.type === 'received').length; context += '\n' + p.name + ' (' + (STAGES[p.stage]?.label) + ', ' + p.score + '): ' + sent + ' sent, ' + received + ' received'; if (p.toneAnalysis) context += ', tone: ' + p.toneAnalysis.tone; if (p.notes) context += ', notes: ' + p.notes; });
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600,
+          messages: [{ role: 'user', content: 'You are a sales coach reviewing a freight brokerage recruiter\'s daily pipeline. Be direct and actionable.\n\n' + context + '\n\nGive a brief daily coaching summary: WINS, WATCH, NEXT MOVES (name the prospect), PATTERNS, ONE TIP. Keep it conversational.' }] }) });
+      const data = await response.json(); if (data.error) throw new Error(data.error.message);
+      const text = data.content.map(i => i.text || '').join('\n').trim();
+      container.innerHTML = '<div class="summary-ai-box">' + text + '</div>';
+    } catch (err) { console.error('Coaching error:', err); container.innerHTML = '<div class="summary-ai-box" style="color:var(--text3);">Could not generate AI coaching.</div>'; }
+  }
+
+  // Voice Lab
+  function getExamples(type) {
+    const container = document.getElementById('vl-' + type + '-examples');
+    return Array.from(container.querySelectorAll('.vl-example')).map(el => { const clone = el.cloneNode(true); clone.querySelector('.vl-tag')?.remove(); clone.querySelector('.vl-remove')?.remove(); return clone.textContent.trim(); }).filter(Boolean);
+  }
+  function getPersonal() { const container = document.getElementById('vl-personal'); return Array.from(container.querySelectorAll('.vl-example')).map(el => { const clone = el.cloneNode(true); clone.querySelector('.vl-tag')?.remove(); clone.querySelector('.vl-remove')?.remove(); return clone.textContent.trim(); }).filter(Boolean); }
+  function getPosts() { const container = document.getElementById('vl-posts'); return Array.from(container.querySelectorAll('.vl-example')).map(el => { const clone = el.cloneNode(true); clone.querySelector('.vl-tag')?.remove(); clone.querySelector('.vl-remove')?.remove(); return clone.textContent.trim(); }).filter(Boolean); }
+
+  function createExampleDiv(tagCls, tagLabel, text) { const div = document.createElement('div'); div.className = 'vl-example collapsed'; div.onclick = function(e) { if (!e.target.closest('.vl-remove')) this.classList.toggle('collapsed'); }; div.innerHTML = '<div class="vl-tag ' + tagCls + '">' + tagLabel + '</div><button class="vl-remove" onclick="removeExample(this)">✕</button>' + text; return div; }
+  function addExample(type) { const input = document.getElementById('vl-' + type + '-input'); const text = input.value.trim(); if (!text) return; const container = document.getElementById('vl-' + type + '-examples'); container.appendChild(createExampleDiv(type === 'good' ? 'good' : 'bad', type === 'good' ? 'Good' : 'Avoid', text)); input.value = ''; buildStylePrompt(); persistAll(); }
+  function addPost() { const input = document.getElementById('vl-post-input'); const text = input.value.trim(); if (!text) return; document.getElementById('vl-posts').appendChild(createExampleDiv('good', 'Post', text)); input.value = ''; buildStylePrompt(); persistAll(); }
+  function addPersonal() { const input = document.getElementById('vl-personal-input'); const text = input.value.trim(); if (!text) return; document.getElementById('vl-personal').appendChild(createExampleDiv('good', 'My Writing', text)); input.value = ''; buildStylePrompt(); persistAll(); }
+  function removeExample(btn) { btn.closest('.vl-example').remove(); buildStylePrompt(); persistAll(); }
+  function saveVoiceLab() { buildStylePrompt(); persistAll(); }
+
+  function buildStylePrompt() {
+    const style = document.getElementById('vl-style')?.value || ''; const company = document.getElementById('vl-company')?.value || '';
+    const rules = document.getElementById('vl-rules')?.value || ''; const good = getExamples('good'); const bad = getExamples('bad');
+    const posts = getPosts(); const personal = getPersonal();
+    let p = 'You are writing as Josh Brawley. Write LinkedIn DMs in Josh\'s exact voice.\n\nVOICE & STYLE:\n' + style + '\n\n';
+    if (personal.length) { p += 'JOSH\'S OWN WRITING (match this voice):\n'; personal.forEach((w, i) => p += '--- Sample ' + (i+1) + ' ---\n' + w + '\n'); p += '\n'; }
+    if (company) p += 'ABOUT THE COMPANY (only mention when natural):\n' + company + '\n\n';
+    if (posts.length) { p += 'RESOLVE LINKEDIN POSTS:\n'; posts.forEach((post, i) => p += '--- Post ' + (i+1) + ' ---\n' + post + '\n'); p += '\n'; }
+    if (rules) p += 'RULES:\n' + rules + '\n\n';
+    if (good.length) { p += 'GOOD MESSAGES (match this tone):\n'; good.forEach(e => p += '- "' + e + '"\n'); p += '\n'; }
+    if (bad.length) { p += 'MESSAGES TO AVOID:\n'; bad.forEach(e => p += '- "' + e + '"\n'); p += '\n'; }
+    p += 'STRATEGY: M1=personal, never pitch. M2=match energy, plant seed. Later=build rapport. Bridge=ask to move to text/phone.';
+    window._joshStyle = p;
+  }
+
+  // Voice Lab Chat
+  const vlChatHistory = [];
+  async function sendChat() {
+    const input = document.getElementById('vl-chat-input'); const text = input.value.trim(); if (!text) return; input.value = '';
+    const messagesDiv = document.getElementById('vl-chat-messages'); const empty = messagesDiv.querySelector('.vl-chat-empty'); if (empty) empty.remove();
+    const userMsg = document.createElement('div'); userMsg.className = 'vl-chat-msg user'; userMsg.textContent = text; messagesDiv.appendChild(userMsg);
+    const loadingMsg = document.createElement('div'); loadingMsg.className = 'vl-chat-msg ai'; loadingMsg.innerHTML = '<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Writing...'; messagesDiv.appendChild(loadingMsg); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    vlChatHistory.push({ role: 'user', content: text });
+    const style = document.getElementById('vl-style')?.value || ''; const company = document.getElementById('vl-company')?.value || '';
+    const personal = getPersonal(); const posts = getPosts(); const rules = document.getElementById('vl-rules')?.value || '';
+    let system = 'You are Josh Brawley\'s writing assistant. Write everything in Josh\'s voice.\n\nJOSH\'S VOICE:\n' + style + '\n\n';
+    if (personal.length) { system += 'JOSH\'S OWN WRITING:\n'; personal.forEach((w, i) => system += '--- Sample ' + (i+1) + ' ---\n' + w + '\n'); system += '\n'; }
+    if (company) system += 'ABOUT RESOLVE:\n' + company + '\n\n';
+    if (posts.length) { system += 'RESOLVE POSTS:\n'; posts.forEach((p, i) => system += '--- Post ' + (i+1) + ' ---\n' + p + '\n'); system += '\n'; }
+    if (rules) system += 'RULES:\n' + rules + '\n\n';
+    system += 'When writing LinkedIn posts: punchy, authentic, no hashtag spam. Short paragraphs.\nIMPORTANT: If request is vague — ask before writing.';
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, system: system, messages: vlChatHistory }) });
+      const data = await response.json(); if (data.error) throw new Error(data.error.message);
+      const reply = data.content.map(i => i.text || '').join('\n').trim(); vlChatHistory.push({ role: 'assistant', content: reply });
+      loadingMsg.innerHTML = reply + '<div class="copy-post-btn" onclick="copyPost(this)">📋 Copy to clipboard</div><div class="copy-post-btn" onclick="saveToVoiceLab(this, \'personal\')" style="margin-left:12px;">+ Save to My Writing</div><div class="copy-post-btn" onclick="saveToVoiceLab(this, \'post\')" style="margin-left:12px;">+ Save to Resolve Posts</div>';
+    } catch (err) { console.error('Chat error:', err); loadingMsg.innerHTML = 'Error — check API connection.'; loadingMsg.style.color = 'var(--hot)'; }
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function copyPost(el) { const msgEl = el.closest('.vl-chat-msg'); const clone = msgEl.cloneNode(true); clone.querySelectorAll('.copy-post-btn').forEach(b => b.remove()); doCopy(clone.textContent.trim()); el.textContent = '✓ Copied!'; setTimeout(() => { el.textContent = '📋 Copy to clipboard'; }, 1500); }
+  function saveToVoiceLab(el, type) { const msgEl = el.closest('.vl-chat-msg'); const clone = msgEl.cloneNode(true); clone.querySelectorAll('.copy-post-btn').forEach(b => b.remove()); const text = clone.textContent.trim(); const container = document.getElementById(type === 'personal' ? 'vl-personal' : 'vl-posts'); const tag = type === 'personal' ? 'My Writing' : 'Post'; container.appendChild(createExampleDiv('good', tag, text)); el.textContent = '✓ Saved!'; buildStylePrompt(); persistAll(); setTimeout(() => { el.textContent = type === 'personal' ? '+ Save to My Writing' : '+ Save to Resolve Posts'; }, 1500); }
+
+  // Debrief Station
+  let _debriefChannel = 'linkedin'; let _debriefResult = null; let _debriefAutoMatchId = null; let _debriefLog = [];
+  const CHANNEL_CONFIG = {
+    linkedin: { label: 'LinkedIn DM', icon: '💬', inputLabel: 'Paste your LinkedIn conversation', hint: 'Copy the full DM thread and paste it below.' },
+    phone: { label: 'Phone Call', icon: '📞', inputLabel: 'Describe the phone call', hint: 'What did you talk about? What was their vibe? Just dump it.' },
+    text: { label: 'Text Message', icon: '📱', inputLabel: 'Paste your text conversation', hint: 'Paste the text thread below.' },
+    other: { label: 'Other', icon: '📝', inputLabel: 'Describe the interaction', hint: 'Email, in-person, voicemail — describe what happened.' }
+  };
+
+  function selectChannel(btn) { document.querySelectorAll('.debrief-channel').forEach(b => b.classList.remove('active')); btn.classList.add('active'); _debriefChannel = btn.dataset.channel; const cfg = CHANNEL_CONFIG[_debriefChannel]; document.getElementById('debrief-input-label').textContent = cfg.inputLabel; document.getElementById('debrief-input-hint').textContent = cfg.hint; }
+  function clearDebrief() { document.getElementById('debrief-input').value = ''; document.getElementById('debrief-results').style.display = 'none'; document.getElementById('debrief-auto-match').style.display = 'none'; _debriefResult = null; _debriefAutoMatchId = null; }
+
+  function autoDetectProspect(text) {
+    const textLower = text.toLowerCase(); let bestMatch = null; let bestScore = 0;
+    Object.entries(prospects).forEach(([id, p]) => { let score = 0; const fname = (p.fname || '').toLowerCase(); const lname = (p.lname || '').toLowerCase(); const fullName = (p.name || '').toLowerCase();
+      if (fullName && textLower.includes(fullName)) score += 10; else if (fname && lname && textLower.includes(fname) && textLower.includes(lname)) score += 8; else if (fname && fname.length > 2 && textLower.includes(fname)) score += 3;
+      const patterns = ['talked with', 'call with', 'spoke with', 'chatting with', 'met with', 'conversation with', 'texting with', 'dm from', 'message from', 'heard from'];
+      patterns.forEach(pat => { if (textLower.includes(pat + ' ' + fname)) score += 5; if (fullName && textLower.includes(pat + ' ' + fullName)) score += 8; });
+      if (p.company && p.company.length > 2 && textLower.includes(p.company.toLowerCase())) score += 2;
+      if (score > bestScore) { bestScore = score; bestMatch = { id, name: p.name, score }; } });
+    return bestScore >= 3 ? bestMatch : null;
+  }
+
+  function populateProspectDropdown() { const select = document.getElementById('debrief-prospect-select'); const current = select.value; select.innerHTML = '<option value="">— Select a prospect —</option>'; Object.entries(prospects).sort((a, b) => a[1].name.localeCompare(b[1].name)).forEach(([id, p]) => { const opt = document.createElement('option'); opt.value = id; opt.textContent = p.name + (p.company ? ' — ' + p.company : '') + ' (' + (STAGES[p.stage]?.label || p.stage) + ')'; select.appendChild(opt); }); if (current) select.value = current; }
+
+  // *** THIS IS THE FIXED FUNCTION — was missing the fetch() wrapper ***
+  async function analyzeDebrief() {
+    const input = document.getElementById('debrief-input'); const rawText = input.value.trim(); if (!rawText) return;
+    const btn = document.getElementById('debrief-analyze-btn'); btn.textContent = '⚡ Analyzing...'; btn.disabled = true;
+    const cfg = CHANNEL_CONFIG[_debriefChannel];
+    let cleanedText = rawText;
+    if (_debriefChannel === 'linkedin') { cleanedText = rawText
+      .replace(/View \w+[''']s profile\w*/gi, '')
+      .replace(/sent the following messages? at .+/gi, '')
+      .replace(/Activate to view larger image[^\n]*/gi, '')
+      .replace(/graphical user interface[^\n]*/gi, '')
+      .replace(/\d+ followers?\d* followers?/gi, '')
+      .replace(/Visit website/gi, '')
+      .replace(/\d+d • .+? • Visible to anyone on or off LinkedIn/gi, '')
+      .replace(/…more/g, '')
+      .replace(/^\s*\*\s*$/gm, '')
+      .replace(/^\s*\*\s+/gm, '')
+      .replace(/\s{2,}\*\s+/g, ' ')
+      .replace(/hashtag#/g, '#')
+      .replace(/^\s*[✅👏👍👎❤️🔥💯🙏😂😢😮🎉]+\s*$/gm, function(m) { return '[reaction: ' + m.trim() + ']'; })
+      .replace(/\d{1,2}:\d{2}\s*(AM|PM)/gi, '')
+      .replace(/^\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\s*/gim, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim(); }
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: 'Parse this ' + cfg.label + ' conversation for freight recruiter Josh (Joshua Brawley). Return ONLY valid JSON — no text before or after, no markdown fences. Start with { and end with }.\n\nInput:\n---\n' + cleanedText + '\n---\n\nJSON format:\n{"prospect_name":"other person full name","summary":"3-5 sentence debrief","tone":"positive|neutral|cautious|cold","tone_reading":"2-3 sentences","approach":"1-2 sentences tactical next move","key_quotes":["max 3 notable quotes"],"messages":[{"type":"sent","text":"Josh msg"},{"type":"received","text":"prospect msg"}]}\n\nRules:\n- Josh / Joshua Brawley = sent. The OTHER person = received.\n- The input is copy-pasted from LinkedIn and contains artifacts like bullet points, timestamps, "View profile" text, emoji reactions (✅👏👍 etc), and other UI junk. IGNORE all of that and focus on the actual message content.\n- Names appear before their messages, often with timestamps like "3:09 PM". Use these to identify who said what.\n- Combine consecutive messages from the same person into one message block.\n- Emoji-only messages (like ✅👏👍) are reactions — mention them in the summary but you can skip them in the messages array or note them briefly.\n- For phone calls, messages array = [].\n- IMPORTANT: Escape any quotes inside JSON string values properly with backslash.' }]
+        })
+      });
+      const data = await response.json(); if (data.error) throw new Error(data.error.message);
+      const rawResponse = data.content.map(i => i.text || '').join('\n');
+      try { _debriefResult = JSON.parse(rawResponse.replace(/```json|```/g, '').trim()); }
+      catch (parseErr) { const jsonMatch = rawResponse.match(/\{[\s\S]*\}/); if (jsonMatch) { try { _debriefResult = JSON.parse(jsonMatch[0]); } catch (e2) { throw new Error('Could not parse AI response.'); } } else { throw new Error('AI did not return JSON.'); } }
+      _debriefResult.channel = _debriefChannel; _debriefResult.channelLabel = cfg.label; _debriefResult.channelIcon = cfg.icon; _debriefResult.rawText = rawText; _debriefResult.rawPreview = rawText.length > 300 ? rawText.substring(0, 300) + '...' : rawText; _debriefResult.date = now();
+      const toneCls = _debriefResult.tone === 'positive' ? 'tone-positive' : _debriefResult.tone === 'cautious' ? 'tone-cautious' : _debriefResult.tone === 'cold' ? 'tone-cold' : 'tone-neutral';
+      let resultsHtml = '<div class="tone-header"><span style="font-size:12px;">' + cfg.icon + ' ' + cfg.label + '</span><span class="tone-badge ' + toneCls + '">' + _debriefResult.tone + '</span></div><div class="tone-reading" style="margin-top:8px;white-space:pre-wrap;">' + _debriefResult.summary + '</div><div class="tone-reading" style="margin-top:8px;color:var(--text2);">' + _debriefResult.tone_reading + '</div><div class="tone-suggestion" style="margin-top:8px;">💡 ' + _debriefResult.approach + '</div>';
+      if (_debriefResult.key_quotes && _debriefResult.key_quotes.length > 0) { resultsHtml += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);">'; _debriefResult.key_quotes.forEach(q => { resultsHtml += '<div style="font-size:10px;color:var(--text2);margin-top:4px;font-style:italic;">"' + q + '"</div>'; }); resultsHtml += '</div>'; }
+      document.getElementById('debrief-summary-box').innerHTML = resultsHtml; document.getElementById('debrief-results').style.display = 'block';
+      populateProspectDropdown();
+      let autoMatch = null;
+      if (_debriefResult.prospect_name) { const aiName = _debriefResult.prospect_name.toLowerCase(); Object.entries(prospects).forEach(([id, p]) => { const fname = (p.fname || '').toLowerCase(); const fullName = (p.name || '').toLowerCase(); if (fullName === aiName || fname === aiName || fullName.includes(aiName) || aiName.includes(fname)) { if (!autoMatch || fullName === aiName) autoMatch = { id, name: p.name, score: 10 }; } }); }
+      if (!autoMatch) autoMatch = autoDetectProspect(rawText);
+      if (autoMatch) { _debriefAutoMatchId = autoMatch.id; document.getElementById('debrief-match-name').textContent = autoMatch.name; document.getElementById('debrief-auto-match').style.display = 'block'; document.getElementById('debrief-manual-assign').style.display = 'none'; }
+      else { _debriefAutoMatchId = null; document.getElementById('debrief-auto-match').style.display = 'none'; document.getElementById('debrief-manual-assign').style.display = 'block'; }
+    } catch (err) { console.error('Debrief analysis error:', err); alert('Analysis failed: ' + err.message); }
+    finally { btn.textContent = '⚡ Analyze'; btn.disabled = false; }
+  }
+
+  function confirmAutoAssign() { if (!_debriefAutoMatchId || !_debriefResult) return; saveDebriefToProspect(_debriefAutoMatchId); }
+  function rejectAutoAssign() { _debriefAutoMatchId = null; document.getElementById('debrief-auto-match').style.display = 'none'; document.getElementById('debrief-manual-assign').style.display = 'block'; }
+  function assignDebrief() { const select = document.getElementById('debrief-prospect-select'); const id = select.value; if (!id || !_debriefResult) return; saveDebriefToProspect(id); }
+
+  function saveDebriefToProspect(id) {
+    const p = prospects[id]; if (!p || !_debriefResult) return;
+    if (!p.debriefs) p.debriefs = [];
+    const record = { channel: _debriefResult.channel, channelLabel: _debriefResult.channelLabel, summary: _debriefResult.summary, tone: _debriefResult.tone, tone_reading: _debriefResult.tone_reading, approach: _debriefResult.approach, key_quotes: _debriefResult.key_quotes || [], rawPreview: _debriefResult.rawPreview || '', date: _debriefResult.date };
+    p.debriefs.push(record);
+    p.toneAnalysis = { tone: _debriefResult.tone, reading: _debriefResult.tone_reading, approach: _debriefResult.approach };
+    if (_debriefResult.messages && _debriefResult.messages.length > 0) { _debriefResult.messages.forEach(m => p.thread.push(m)); }
+    if (_debriefResult.approach) p.guidance = _debriefResult.approach;
+    _debriefLog.unshift({ prospectId: id, prospectName: p.name, channel: record.channel, channelLabel: record.channelLabel, summary: record.summary, tone: record.tone, date: record.date });
+    logActivity('📋 Debrief logged for ' + p.name + ' (' + record.channelLabel + ')', 'var(--accent)');
+    renderCardBody(id); persistAll();
+    const resultsDiv = document.getElementById('debrief-results');
+    resultsDiv.innerHTML = '<div class="vl-section" style="margin-top:0;text-align:center;padding:24px;"><div style="font-size:24px;margin-bottom:8px;">✓</div><div style="font-family:Syne,sans-serif;font-weight:600;font-size:14px;color:var(--text);">Saved to ' + p.name + '</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">Debrief logged • Tone updated • Guidance set</div><button class="btn btn-primary" onclick="clearDebrief();document.getElementById(\'debrief-results\').style.display=\'none\';" style="margin-top:14px;">New Debrief</button><button class="btn btn-ghost" onclick="showView(\'pipeline\')" style="margin-top:14px;margin-left:8px;">View Pipeline</button></div>';
+    refreshDebriefHistory();
+  }
+
+  function refreshDebriefHistory() {
+    const container = document.getElementById('debrief-history');
+    if (_debriefLog.length === 0) { container.innerHTML = '<div class="vl-chat-empty">Your debrief history will<br>appear here as you log<br>conversations.</div>'; return; }
+    let html = ''; _debriefLog.slice(0, 30).forEach(d => { const channelIcons = { linkedin: '💬', phone: '📞', text: '📱', other: '📝' }; const icon = channelIcons[d.channel] || '📝'; const toneCls = d.tone === 'positive' ? 'tone-positive' : d.tone === 'cautious' ? 'tone-cautious' : d.tone === 'cold' ? 'tone-cold' : 'tone-neutral';
+      html += '<div class="debrief-history-item"><div class="debrief-history-channel">' + icon + ' ' + (d.channelLabel || d.channel) + ' <span class="tone-badge ' + toneCls + '" style="font-size:7px;padding:1px 5px;">' + d.tone + '</span></div><div class="debrief-history-prospect">' + d.prospectName + '</div><div class="debrief-history-summary">' + d.summary + '</div><div class="debrief-history-time">' + d.date + '</div></div>'; });
+    container.innerHTML = html;
+  }
+
+  // CSV Import
+  function importCSV(event) {
+    const file = event.target.files[0]; if (!file) return; event.target.value = '';
+    const reader = new FileReader(); reader.onload = function(e) {
+      try {
+        const text = e.target.result; const lines = text.split('\n').filter(l => l.trim()); if (lines.length < 2) throw new Error('CSV has no data rows');
+        const headers = parseCSVRow(lines[0]).map(h => h.toLowerCase().trim());
+        const colMap = { fname: findCol(headers, ['first name','first_name','firstname','fname']), lname: findCol(headers, ['last name','last_name','lastname','lname']), name: findCol(headers, ['full name','full_name','fullname','name','person name']), title: findCol(headers, ['title','job title','job_title','position','headline']), company: findCol(headers, ['company','company name','company_name','organization']), location: findCol(headers, ['location','city','geography','person location']), linkedin: findCol(headers, ['linkedin','linkedin url','linkedin_url','profile url','person linkedin url']), tenure: findCol(headers, ['tenure','years','experience']) };
+        let imported = 0, skipped = 0;
+        for (let i = 1; i < lines.length; i++) {
+          const vals = parseCSVRow(lines[i]); if (vals.length < 2) continue;
+          let fname = colMap.fname !== -1 ? vals[colMap.fname]?.trim() : ''; let lname = colMap.lname !== -1 ? vals[colMap.lname]?.trim() : '';
+          if (!fname && !lname && colMap.name !== -1) { const full = vals[colMap.name]?.trim() || ''; const parts = full.split(' '); fname = parts[0] || ''; lname = parts.slice(1).join(' ') || ''; }
+          if (!fname) { skipped++; continue; }
+          const fullName = (fname + ' ' + lname).trim().toLowerCase(); const isDupe = Object.values(prospects).some(p => (p.fname + ' ' + p.lname).trim().toLowerCase() === fullName); if (isDupe) { skipped++; continue; }
+          const title = colMap.title !== -1 ? vals[colMap.title]?.trim() || '' : ''; const company = colMap.company !== -1 ? vals[colMap.company]?.trim() || '' : ''; const location = colMap.location !== -1 ? vals[colMap.location]?.trim() || '' : ''; const linkedin = colMap.linkedin !== -1 ? vals[colMap.linkedin]?.trim() || '' : ''; const tenure = colMap.tenure !== -1 ? vals[colMap.tenure]?.trim() || '' : '';
+          const id = 'card' + cardCounter; cardCounter++;
+          prospects[id] = { name: fname + ' ' + lname, fname, lname, linkedin, title, company, location, tenure, score: 'cold', stage: 'new', hook: '', draft: '', phone: '', notes: '', guidance: '', empStatus: '', numberRequested: false, numberDeclined: false, toneAnalysis: null, thread: [], stageHistory: [{ stage: 'new', time: now() }], debriefs: [] };
+          const initials = ((fname || '?')[0] + ((lname || '')[0] || '')).toUpperCase(); const avatarBg = AVATAR_COLORS[cardCounter % AVATAR_COLORS.length];
+          const card = document.createElement('div'); card.className = 'prospect-card'; card.id = id;
+          card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + fname + ' ' + lname + '</div><div class="card-meta">' + [title, company, location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge score-cold">❄️ Cold</span><div class="status-chip chip-new">New</div>' + (tenure ? '<div class="card-tenure">' + tenure + ' tenure</div>' : '') + '</div></div><div class="card-body"></div>';
+          document.querySelector('.queue').appendChild(card); renderCardBody(id); imported++;
+        }
+        document.getElementById('emptyState').style.display = imported > 0 ? 'none' : 'block'; updateSidebarCounts(); persistAll();
+        const activeFilter = document.querySelector('.stage-item.active'); if (activeFilter) filterStage(activeFilter);
+        logActivity('📂 CSV imported: ' + imported + ' added, ' + skipped + ' skipped', 'var(--accent)');
+      } catch (err) { alert('CSV import failed: ' + err.message); }
+    }; reader.readAsText(file);
+  }
+  function parseCSVRow(line) { const result = []; let current = ''; let inQuotes = false; for (let i = 0; i < line.length; i++) { const ch = line[i]; if (ch === '"') { if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } else { inQuotes = !inQuotes; } } else if (ch === ',' && !inQuotes) { result.push(current); current = ''; } else { current += ch; } } result.push(current); return result; }
+  function findCol(headers, names) { for (const name of names) { const idx = headers.indexOf(name); if (idx !== -1) return idx; } return -1; }
+
+  // Export / Import Backup
+  function buildSavePayload() {
+    const prospectData = {}; for (const [id, p] of Object.entries(prospects)) { const clone = Object.assign({}, p); delete clone._toneLoading; delete clone._lastSuggestion; prospectData[id] = clone; }
+    return { prospects: prospectData, cardCounter: cardCounter, debriefLog: _debriefLog, vl: { style: document.getElementById('vl-style')?.value || '', company: document.getElementById('vl-company')?.value || '', rules: document.getElementById('vl-rules')?.value || '', good: getExamples('good'), bad: getExamples('bad'), posts: getPosts(), personal: getPersonal() } };
+  }
+
+  function exportData() {
+    const data = buildSavePayload(); data._version = 1; data._exported = new Date().toISOString();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'agient-backup-' + new Date().toISOString().slice(0,10) + '.json'; a.click(); URL.revokeObjectURL(url);
+  }
+
+  function importData(event) {
+    const file = event.target.files[0]; if (!file) return; event.target.value = '';
+    const reader = new FileReader(); reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result); if (!data._version && !data.prospects) throw new Error('Not a valid AGIent backup');
+        restoreFromData(data); buildStylePrompt(); updateSidebarCounts(); persistAll(); alert('✓ Backup restored successfully!');
+      } catch (err) { alert('Import failed: ' + err.message); }
+    }; reader.readAsText(file);
+  }
+
+  function restoreFromData(data) {
+    if (data.debriefLog) _debriefLog = data.debriefLog;
+    if (data.vl || data.voiceLab) {
+      const vl = data.vl || data.voiceLab;
+      if (vl.style) document.getElementById('vl-style').value = vl.style;
+      if (vl.company) document.getElementById('vl-company').value = vl.company;
+      if (vl.rules) document.getElementById('vl-rules').value = vl.rules;
+      const goodList = vl.good || vl.goodExamples || []; const badList = vl.bad || vl.badExamples || [];
+      if (goodList.length) { const c = document.getElementById('vl-good-examples'); c.innerHTML = ''; goodList.forEach(t => c.appendChild(createExampleDiv('good', 'Good', t))); }
+      if (badList.length) { const c = document.getElementById('vl-bad-examples'); c.innerHTML = ''; badList.forEach(t => c.appendChild(createExampleDiv('bad', 'Avoid', t))); }
+      if (vl.posts?.length) { const c = document.getElementById('vl-posts'); c.innerHTML = ''; vl.posts.forEach(t => c.appendChild(createExampleDiv('good', 'Post', t))); }
+      if (vl.personal?.length) { const c = document.getElementById('vl-personal'); c.innerHTML = ''; vl.personal.forEach(t => c.appendChild(createExampleDiv('good', 'My Writing', t))); }
+    }
+    if (data.cardCounter) cardCounter = data.cardCounter;
+    if (data.prospects) {
+      document.querySelectorAll('.prospect-card').forEach(el => el.remove()); for (const id in prospects) delete prospects[id];
+      for (const [id, p] of Object.entries(data.prospects)) {
+        if (['sent', 'replied', 'conversation'].includes(p.stage)) p.stage = 'messaging';
+        if (!p.debriefs) p.debriefs = [];
+        prospects[id] = p;
+        const initials = ((p.fname || '?')[0] + ((p.lname || '')[0] || '')).toUpperCase(); const avatarBg = AVATAR_COLORS[parseInt(id.replace('card','')) % AVATAR_COLORS.length]; const si = STAGES[p.stage] || STAGES.new; const sc = SCORES[p.score] || SCORES.cold;
+        const card = document.createElement('div'); card.className = 'prospect-card'; card.id = id; card.style.animationDelay = '0s';
+        card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + p.fname + ' ' + p.lname + '</div><div class="card-meta">' + [p.title, p.company, p.location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (p.tenure ? '<div class="card-tenure">' + p.tenure + ' tenure</div>' : '') + '</div></div><div class="card-body"></div>';
+        document.querySelector('.queue').appendChild(card); renderCardBody(id);
+      }
+      document.getElementById('emptyState').style.display = Object.keys(data.prospects).length > 0 ? 'none' : 'block';
+    }
+  }
+
+  // Persistence — dual save (localStorage + cloud), smart loading
+  let _cloudSaveTimer = null;
+  let _lastCloudSave = null;
+  let _cloudAvailable = false;
+
+  function updateSyncStatus(state, msg) {
+    const el = document.getElementById('syncStatus');
+    if (!el) return;
+    const icons = { saving: '🔄', saved: '☁️', local: '💾', error: '⚠️', loading: '⏳' };
+    el.textContent = (icons[state] || '') + ' ' + msg;
+    el.className = 'sync-status sync-' + state;
+    if (state === 'saved') setTimeout(() => { if (el.textContent.includes(msg)) el.textContent = '☁️ Synced'; }, 2000);
+  }
+
+  function scheduleCloudSave() {
+    if (_cloudSaveTimer) clearTimeout(_cloudSaveTimer);
+    _cloudSaveTimer = setTimeout(async () => {
+      if (!window.storage) { updateSyncStatus('local', 'Local only'); return; }
+      try {
+        updateSyncStatus('saving', 'Saving to cloud...');
+        const payload = buildSavePayload();
+        payload._savedAt = new Date().toISOString();
+        payload._prospectCount = Object.keys(payload.prospects).length;
+        await window.storage.set('agient_backup', JSON.stringify(payload));
+        _lastCloudSave = new Date();
+        _cloudAvailable = true;
+        updateSyncStatus('saved', 'Saved to cloud');
+        console.log('☁️ Cloud backup saved —', payload._prospectCount, 'prospects');
+      } catch (e) {
+        updateSyncStatus('error', 'Cloud save failed');
+        console.warn('Cloud save failed:', e);
+      }
+    }, 2000);
+  }
+
+  function persistAll() {
+    const data = buildSavePayload();
+    try {
+      localStorage.setItem('agient_prospects', JSON.stringify(data.prospects));
+      localStorage.setItem('agient_cardCounter', data.cardCounter);
+      localStorage.setItem('agient_debriefLog', JSON.stringify(data.debriefLog || []));
+      localStorage.setItem('agient_vl_style', data.vl.style);
+      localStorage.setItem('agient_vl_company', data.vl.company);
+      localStorage.setItem('agient_vl_rules', data.vl.rules);
+      localStorage.setItem('agient_vl_good', JSON.stringify(data.vl.good));
+      localStorage.setItem('agient_vl_bad', JSON.stringify(data.vl.bad));
+      localStorage.setItem('agient_vl_posts', JSON.stringify(data.vl.posts));
+      localStorage.setItem('agient_vl_personal', JSON.stringify(data.vl.personal));
+      localStorage.setItem('agient_lastSave', new Date().toISOString());
+    } catch (e) { console.warn('localStorage save failed:', e); }
+    scheduleCloudSave();
+  }
+
+  async function loadFromCloud() {
+    if (!window.storage) return null;
+    try {
+      const result = await window.storage.get('agient_backup');
+      if (result && result.value) {
+        const data = JSON.parse(result.value);
+        _cloudAvailable = true;
+        console.log('☁️ Cloud backup found —', data._prospectCount || '?', 'prospects, saved', data._savedAt || 'unknown');
+        return data;
+      }
+    } catch (e) { console.warn('Cloud load failed:', e); }
+    return null;
+  }
+
+  function copyBackupToClipboard() {
+    const data = buildSavePayload();
+    data._version = 1;
+    data._exported = new Date().toISOString();
+    const json = JSON.stringify(data, null, 2);
+    navigator.clipboard.writeText(json).then(() => {
+      const btn = document.getElementById('copyBackupBtn');
+      if (btn) { const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 2000); }
+    }).catch(() => {
+      // Fallback: open in a textarea modal
+      const ta = document.createElement('textarea');
+      ta.value = json; ta.style.cssText = 'position:fixed;top:10%;left:10%;width:80%;height:60%;z-index:10000;font-size:11px;padding:12px;border-radius:8px;border:2px solid var(--accent);';
+      const close = document.createElement('button');
+      close.textContent = 'Close'; close.style.cssText = 'position:fixed;top:5%;right:10%;z-index:10001;padding:8px 16px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;';
+      close.onclick = () => { ta.remove(); close.remove(); };
+      document.body.appendChild(ta); document.body.appendChild(close);
+      ta.select();
+    });
+  }
+
+  function importFromClipboard() {
+    const input = prompt('Paste your AGIent backup JSON here:');
+    if (!input) return;
+    try {
+      const data = JSON.parse(input);
+      if (!data._version && !data.prospects) throw new Error('Not a valid AGIent backup');
+      restoreFromData(data); buildStylePrompt(); updateSidebarCounts(); persistAll();
+      alert('✓ Backup restored from clipboard!');
+    } catch (err) { alert('Import failed: ' + err.message); }
+  }
+
+  async function loadAll() {
+    updateSyncStatus('loading', 'Loading...');
+    try {
+      const localProspects = localStorage.getItem('agient_prospects');
+      const localSaveTime = localStorage.getItem('agient_lastSave');
+
+      // Try cloud first in background
+      const cloudData = await loadFromCloud();
+
+      // Decide which source to use
+      let useCloud = false;
+      if (cloudData && cloudData.prospects) {
+        if (!localProspects) {
+          // No local data — use cloud
+          useCloud = true;
+        } else if (cloudData._savedAt && localSaveTime) {
+          // Both exist — use whichever is newer
+          useCloud = new Date(cloudData._savedAt) > new Date(localSaveTime);
+        } else if (cloudData._savedAt && !localSaveTime) {
+          useCloud = true;
+        }
+      }
+
+      if (useCloud) {
+        console.log('☁️ Cloud data is newer — restoring from cloud');
+        restoreFromData(cloudData); buildStylePrompt(); updateSidebarCounts();
+        // Save cloud data to localStorage too
+        const data = buildSavePayload();
+        try {
+          localStorage.setItem('agient_prospects', JSON.stringify(data.prospects));
+          localStorage.setItem('agient_cardCounter', data.cardCounter);
+          localStorage.setItem('agient_debriefLog', JSON.stringify(data.debriefLog || []));
+          localStorage.setItem('agient_vl_style', data.vl.style);
+          localStorage.setItem('agient_vl_company', data.vl.company);
+          localStorage.setItem('agient_vl_rules', data.vl.rules);
+          localStorage.setItem('agient_vl_good', JSON.stringify(data.vl.good));
+          localStorage.setItem('agient_vl_bad', JSON.stringify(data.vl.bad));
+          localStorage.setItem('agient_vl_posts', JSON.stringify(data.vl.posts));
+          localStorage.setItem('agient_vl_personal', JSON.stringify(data.vl.personal));
+          localStorage.setItem('agient_lastSave', new Date().toISOString());
+        } catch (e) {}
+        updateSyncStatus('saved', 'Restored from cloud');
+        return;
+      }
+
+      if (localProspects) {
+        const savedDebriefLog = localStorage.getItem('agient_debriefLog'); if (savedDebriefLog) { try { _debriefLog = JSON.parse(savedDebriefLog); } catch(e) {} }
+        const vlStyle = localStorage.getItem('agient_vl_style'); const vlCompany = localStorage.getItem('agient_vl_company'); const vlRules = localStorage.getItem('agient_vl_rules');
+        if (vlStyle !== null) document.getElementById('vl-style').value = vlStyle; if (vlCompany !== null) document.getElementById('vl-company').value = vlCompany; if (vlRules !== null) document.getElementById('vl-rules').value = vlRules;
+        const goodRaw = localStorage.getItem('agient_vl_good'); const badRaw = localStorage.getItem('agient_vl_bad');
+        if (goodRaw) { const good = JSON.parse(goodRaw); const c = document.getElementById('vl-good-examples'); c.innerHTML = ''; good.forEach(text => c.appendChild(createExampleDiv('good', 'Good', text))); }
+        if (badRaw) { const bad = JSON.parse(badRaw); const c = document.getElementById('vl-bad-examples'); c.innerHTML = ''; bad.forEach(text => c.appendChild(createExampleDiv('bad', 'Avoid', text))); }
+        const postsRaw = localStorage.getItem('agient_vl_posts'); if (postsRaw) { const posts = JSON.parse(postsRaw); const c = document.getElementById('vl-posts'); c.innerHTML = ''; posts.forEach(text => c.appendChild(createExampleDiv('good', 'Post', text))); }
+        const personalRaw = localStorage.getItem('agient_vl_personal'); if (personalRaw) { const personal = JSON.parse(personalRaw); const c = document.getElementById('vl-personal'); c.innerHTML = ''; personal.forEach(text => c.appendChild(createExampleDiv('good', 'My Writing', text))); }
+        const savedCounter = localStorage.getItem('agient_cardCounter'); if (savedCounter) cardCounter = parseInt(savedCounter);
+        const data = JSON.parse(localProspects);
+        for (const [id, p] of Object.entries(data)) {
+          if (['sent', 'replied', 'conversation'].includes(p.stage)) p.stage = 'messaging'; if (!p.debriefs) p.debriefs = [];
+          prospects[id] = p;
+          const initials = ((p.fname || '?')[0] + ((p.lname || '')[0] || '')).toUpperCase(); const avatarBg = AVATAR_COLORS[parseInt(id.replace('card','')) % AVATAR_COLORS.length]; const si = STAGES[p.stage] || STAGES.new; const sc = SCORES[p.score] || SCORES.cold;
+          const card = document.createElement('div'); card.className = 'prospect-card'; card.id = id; card.style.animationDelay = '0s';
+          card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + p.fname + ' ' + p.lname + '</div><div class="card-meta">' + [p.title, p.company, p.location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (p.tenure ? '<div class="card-tenure">' + p.tenure + ' tenure</div>' : '') + '</div></div><div class="card-body"></div>';
+          document.querySelector('.queue').appendChild(card); renderCardBody(id);
+        }
+        document.getElementById('emptyState').style.display = Object.keys(data).length > 0 ? 'none' : 'block';
+        console.log('💾 Loaded from localStorage');
+        updateSyncStatus(_cloudAvailable ? 'saved' : 'local', _cloudAvailable ? 'Synced' : 'Local only');
+        // Sync local data up to cloud
+        scheduleCloudSave();
+      } else {
+        updateSyncStatus('local', 'No data found');
+      }
+    } catch (e) { console.warn('Load failed:', e); updateSyncStatus('error', 'Load failed'); }
+  }
+
+  // Patch key functions for auto-save
+  const _origMoveStage = moveStage; moveStage = function(id, newStage) { _origMoveStage(id, newStage); persistAll(); };
+  const _origLogActivity = logActivity; logActivity = function(text, color) { _origLogActivity(text, color); persistAll(); };
+
+  // Init
+  loadAll().then(() => { buildStylePrompt(); updateSidebarCounts(); });
+</script>
+</body>
+</html>
