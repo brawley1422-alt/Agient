@@ -57,21 +57,46 @@
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-linkedin { background: rgba(10,102,194,0.15); color: #4a9eff; border: 1px solid rgba(10,102,194,0.3); font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
   .btn-linkedin:hover { background: rgba(10,102,194,0.25); border-color: rgba(10,102,194,0.5); color: #6abaff; }
+  .btn-li-icon { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 3px 5px; border-radius: 4px; line-height: 1; transition: color 0.15s, background 0.15s; flex-shrink: 0; }
+  .btn-li-icon:hover { color: #4a9eff; background: rgba(10,102,194,0.12); }
+  .search-bar-wrap { padding: 0 0 20px 0; position: relative; }
+  .search-bar { width: 100%; background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 9px 14px 9px 36px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); outline: none; transition: border-color 0.15s; }
+  .search-bar::placeholder { color: var(--text3); }
+  .search-bar:focus { border-color: var(--accent); }
+  .search-bar-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; pointer-events: none; color: var(--text3); }
+  .search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 2px 4px; display: none; }
+  .search-clear.visible { display: block; }
+  .search-no-results { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 12px; display: none; }
+  .search-no-results.visible { display: block; }
+  .bulk-preview { margin-top: 14px; display: none; }
+  .bulk-preview.visible { display: block; }
+  .bulk-preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .bulk-preview-title { font-size: 11px; color: var(--text2); font-family: 'Syne', sans-serif; font-weight: 600; }
+  .bulk-preview-actions { display: flex; gap: 6px; align-items: center; }
+  .bulk-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .bulk-table th { text-align: left; color: var(--text3); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; font-size: 9px; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .bulk-table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: middle; }
+  .bulk-table tr.deselected td { opacity: 0.35; }
+  .bulk-table tr:last-child td { border-bottom: none; }
+  .bulk-row-name { color: var(--text); font-weight: 500; font-size: 11px; }
+  .bulk-row-check { width: 20px; }
+  .bulk-dupe-badge { font-size: 8px; color: var(--warm); border: 1px solid rgba(245,166,35,0.3); padding: 1px 5px; border-radius: 3px; margin-left: 4px; }
+  .bulk-summary { font-size: 10px; color: var(--text3); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
   .card-linkedin { display: flex; margin-top: 10px; }
   .card-linkedin a { font-size: 11px; color: #4a9eff; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 5px; background: rgba(10,102,194,0.08); border: 1px solid rgba(10,102,194,0.15); transition: all 0.15s; }
   .card-linkedin a:hover { background: rgba(10,102,194,0.18); border-color: rgba(10,102,194,0.35); }
-  .prospect-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; transition: all 0.2s; cursor: pointer; animation: fadeSlideIn 0.3s ease forwards; opacity: 0; }
+  .prospect-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; overflow: hidden; transition: all 0.2s; cursor: pointer; animation: fadeSlideIn 0.3s ease forwards; opacity: 0; }
   .prospect-card:nth-child(1) { animation-delay: 0.05s; } .prospect-card:nth-child(2) { animation-delay: 0.1s; } .prospect-card:nth-child(3) { animation-delay: 0.15s; } .prospect-card:nth-child(4) { animation-delay: 0.2s; }
   @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   .prospect-card:hover { border-color: var(--border2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
   .prospect-card.expanded { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-glow); }
-  .card-header { display: flex; align-items: center; padding: 16px 20px; gap: 14px; }
-  .prospect-avatar { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; flex-shrink: 0; color: #fff; }
+  .card-header { display: flex; align-items: center; padding: 8px 14px; gap: 10px; }
+  .prospect-avatar { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 11px; flex-shrink: 0; color: #fff; }
   .card-info { flex: 1; min-width: 0; }
   .card-name { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .card-meta { font-size: 10px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-  .score-badge { padding: 3px 10px; border-radius: 20px; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+  .card-meta { font-size: 10px; color: var(--text3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-right { display: flex; flex-direction: row; align-items: center; gap: 6px; flex-shrink: 0; }
+  .score-badge { padding: 2px 7px; border-radius: 20px; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
   .score-hot { background: rgba(255,77,77,0.15); color: var(--hot); border: 1px solid rgba(255,77,77,0.3); }
   .score-warm { background: rgba(245,166,35,0.15); color: var(--warm); border: 1px solid rgba(245,166,35,0.3); }
   .score-cold { background: rgba(74,158,255,0.15); color: var(--cold); border: 1px solid rgba(74,158,255,0.3); }
@@ -485,6 +510,12 @@
         <button class="btn btn-primary" id="addProspectBtn">+ Add Prospect</button>
       </div>
     </div>
+    <div class="search-bar-wrap" id="searchWrap" style="display:none;">
+      <span class="search-bar-icon">🔍</span>
+      <input class="search-bar" id="prospectSearch" type="text" placeholder="Search by name, company, title, location..." oninput="searchProspects(this.value)" />
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="search-no-results" id="searchNoResults">No prospects match your search.</div>
     <div class="empty-state" id="emptyState">
       <div class="empty-icon">📸</div>
       <div class="empty-title">Your queue is empty</div>
@@ -720,8 +751,46 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
     </div>
     <div class="modal-body">
       <div style="display:flex;gap:6px;margin-bottom:12px;">
-        <button class="btn btn-ghost upload-source-btn active" id="srcLinkedIn" onclick="switchUploadSource('linkedin')" style="font-size:10px;padding:5px 12px;">📸 LinkedIn Screenshot</button>
+        <button class="btn btn-ghost upload-source-btn active" id="srcLinkedIn" onclick="switchUploadSource('linkedin')" style="font-size:10px;padding:5px 12px;">📸 LinkedIn Profile</button>
+        <button class="btn btn-ghost upload-source-btn" id="srcSalesNav" onclick="switchUploadSource('salesnav')" style="font-size:10px;padding:5px 12px;">📋 Sales Nav List</button>
         <button class="btn btn-ghost upload-source-btn" id="srcResume" onclick="switchUploadSource('resume')" style="font-size:10px;padding:5px 12px;">📄 Resume</button>
+      </div>
+      <div class="upload-zone" id="salesNavZone" style="display:none;">
+        <input type="file" id="salesNavInput" accept="image/*" style="display:none" />
+        <div class="upload-placeholder">
+          <div class="upload-icon">📋</div>
+          <div class="upload-title">Drop a Sales Navigator list screenshot</div>
+          <div class="upload-subtitle">AI will extract all visible prospects — you'll review before adding</div>
+        </div>
+        <img class="upload-preview" id="salesNavPreview" />
+        <div class="upload-actions" id="salesNavActions" style="display:none;">
+          <button class="btn btn-ghost" onclick="clearSalesNav(event)" style="font-size:10px;padding:5px 10px;">Remove</button>
+          <button class="btn btn-primary" onclick="parseSalesNavList(event)" id="salesNavParseBtn" style="font-size:10px;padding:5px 10px;">⚡ Extract Prospects</button>
+        </div>
+      </div>
+      <div class="bulk-preview" id="bulkPreview">
+        <div class="bulk-preview-header">
+          <div class="bulk-preview-title" id="bulkPreviewTitle">0 prospects found</div>
+          <div class="bulk-preview-actions">
+            <button class="btn btn-ghost" onclick="bulkSelectAll(true)" style="font-size:9px;padding:3px 8px;">Select All</button>
+            <button class="btn btn-ghost" onclick="bulkSelectAll(false)" style="font-size:9px;padding:3px 8px;">Deselect All</button>
+          </div>
+        </div>
+        <table class="bulk-table" id="bulkTable">
+          <thead><tr><th class="bulk-row-check"></th><th>Name</th><th>Title</th><th>Company</th><th>Location</th></tr></thead>
+          <tbody id="bulkTableBody"></tbody>
+        </table>
+        <div class="bulk-summary" id="bulkSummary"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="clearBulkPreview()" style="font-size:10px;">Cancel</button>
+          <button class="btn btn-ghost" id="bulkAddBtn" onclick="bulkAddProspects(false)" style="font-size:11px;">Add to Queue</button>
+          <button class="btn btn-primary" id="bulkAddOpenBtn" onclick="bulkAddProspects(true)" style="font-size:11px;">Add + Copy LinkedIn URLs →</button>
+        </div>
+        <div id="bulkUrlList" style="display:none;margin-top:14px;padding:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;">
+          <div style="font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--text3);margin-bottom:10px;">LinkedIn URLs — click any to open, or copy all</div>
+          <div id="bulkUrlLinks" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;"></div>
+          <button class="btn btn-ghost" onclick="copyAllLinkedInUrls()" style="font-size:10px;margin-top:10px;width:100%;">📋 Copy All URLs to Clipboard</button>
+        </div>
       </div>
       <div class="upload-zone" id="uploadZone">
         <input type="file" id="screenshotInput" accept="image/*" style="display:none" />
@@ -817,7 +886,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
           <button class="btn btn-ghost" onclick="copyDraft('${id}')">Copy</button>
           <button class="btn btn-ghost" onclick="suggestReply('${id}')" id="suggest-btn-${id}" style="color:var(--accent);border-color:var(--accent-border);">⚡ AI Suggest</button>
           ${p._lastSuggestion ? `<div class="thumb-row"><button class="thumb-btn" onclick="thumbVote('${id}','up',this)" title="Good suggestion">👍</button><button class="thumb-btn" onclick="thumbVote('${id}','down',this)" title="Bad suggestion">👎</button></div>` : ''}
-          ${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener" onclick="copyDraft('${id}')">Open LinkedIn ↗</a>` : ''}
+          ${p.linkedin ? `<button class="btn btn-linkedin" onclick="openLinkedIn('${id}')">Open LinkedIn ↗</button>` : `<button class="btn btn-linkedin" onclick="openLinkedIn('${id}')">🔍 Search LinkedIn</button>`}
           <button class="btn btn-primary" onclick="sendMessage('${id}')">${si.action || 'Send Message →'}</button>
           ${stage === 'messaging' ? `<button class="btn btn-ghost" onclick="moveStage('${id}','bridge')" style="border-color:var(--warm);color:var(--warm);">→ Bridge</button>` : ''}
           <button class="btn btn-ghost" onclick="moveStage('${id}','nurture')">Nurture</button>
@@ -832,7 +901,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
         <div class="card-section-label">Enter Their Number</div>
         <div class="phone-section"><input type="tel" id="phone-${id}" placeholder="Enter their number..." /><button class="btn btn-primary" onclick="savePhoneAndAdvance('${id}')" style="font-size:10px;padding:6px 12px;">Got Number → Active</button></div>
         <div class="message-actions" style="margin-top:12px;">
-          ${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener">Check LinkedIn ↗</a>` : ''}
+          <button class="btn btn-linkedin" onclick="openLinkedIn('${id}')">Check LinkedIn ↗</button>
           <button class="btn btn-ghost" onclick="declineNumber('${id}')" style="border-color:var(--warm);color:var(--warm);">Declined Number</button>
           <button class="btn btn-ghost" onclick="moveStage('${id}','nurture')">Nurture</button>
         </div>`;
@@ -845,13 +914,13 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
           <button class="btn btn-ghost" onclick="copyDraft('${id}')">Copy</button>
           <button class="btn btn-ghost" onclick="suggestReply('${id}')" id="suggest-btn-${id}" style="color:var(--accent);border-color:var(--accent-border);">⚡ AI Suggest</button>
           ${p._lastSuggestion ? `<div class="thumb-row"><button class="thumb-btn" onclick="thumbVote('${id}','up',this)">👍</button><button class="thumb-btn" onclick="thumbVote('${id}','down',this)">👎</button></div>` : ''}
-          ${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener" onclick="copyDraft('${id}')">Open LinkedIn ↗</a>` : ''}
+          ${p.linkedin ? `<button class="btn btn-linkedin" onclick="openLinkedIn('${id}')">Open LinkedIn ↗</button>` : `<button class="btn btn-linkedin" onclick="openLinkedIn('${id}')">🔍 Search LinkedIn</button>`}
           <button class="btn btn-primary" onclick="sendM3AndNurture('${id}')">Send M3 → Nurture</button>
         </div>`;
     }
     if (['active', 'signed'].includes(stage) && p.phone) { html += `<div class="card-section-label">Phone</div><div class="phone-display">📞 <a href="tel:${p.phone}">${p.phone}</a></div>`; }
-    if (['active', 'signed'].includes(stage)) { html += `<div class="message-actions" style="margin-top:12px;">${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}${si.action ? `<button class="btn btn-primary" onclick="advanceStage('${id}')">${si.action}</button>` : ''}</div>`; }
-    if (stage === 'nurture') { html += `<div class="message-actions" style="margin-top:12px;">${p.linkedin ? `<a class="btn btn-linkedin" href="${p.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}<button class="btn btn-primary" onclick="moveStage('${id}','new')">Re-engage → New</button></div>`; }
+    if (['active', 'signed'].includes(stage)) { html += `<div class="message-actions" style="margin-top:12px;"><button class="btn btn-linkedin" onclick="openLinkedIn('${id}')">${p.linkedin ? 'LinkedIn ↗' : '🔍 Search LinkedIn'}</button>${si.action ? `<button class="btn btn-primary" onclick="advanceStage('${id}')">${si.action}</button>` : ''}</div>`; }
+    if (stage === 'nurture') { html += `<div class="message-actions" style="margin-top:12px;"><button class="btn btn-linkedin" onclick="openLinkedIn('${id}')">${p.linkedin ? 'LinkedIn ↗' : '🔍 Search LinkedIn'}</button><button class="btn btn-primary" onclick="moveStage('${id}','new')">Re-engage → New</button></div>`; }
     html += `<div class="card-section-label">Score</div><select class="stage-select" onchange="saveScore('${id}', this.value)" style="margin-bottom:10px;"><option value="cold" ${p.score === 'cold' ? 'selected' : ''}>❄️ Cold</option><option value="warm" ${p.score === 'warm' ? 'selected' : ''}>⚡ Warm</option><option value="hot" ${p.score === 'hot' ? 'selected' : ''}>🔥 Hot</option></select>`;
     const debriefs = (p.debriefs || []);
     if (debriefs.length > 0) {
@@ -872,6 +941,40 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
   }
 
   function updateDraft(id) { const ta = document.getElementById('draft-' + id); if (ta) { prospects[id].draft = ta.value; persistAll(); } }
+
+  function openLinkedIn(id) {
+    const p = prospects[id]; if (!p) return;
+    if (p.linkedin && p.linkedin.startsWith('http')) {
+      window.open(p.linkedin, '_blank');
+    } else {
+      const terms = [p.name, p.title, p.company].filter(Boolean).join(' ');
+      window.open('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(terms), '_blank');
+    }
+  }
+
+  let _searchQuery = '';
+  function searchProspects(val) {
+    _searchQuery = val.trim().toLowerCase();
+    const clearBtn = document.getElementById('searchClear');
+    clearBtn.classList.toggle('visible', _searchQuery.length > 0);
+    const noResults = document.getElementById('searchNoResults');
+    const cards = document.querySelectorAll('.prospect-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const p = prospects[card.id]; if (!p) return;
+      if (!_searchQuery) { card.classList.remove('filtered-out'); visible++; return; }
+      const haystack = [p.name, p.title, p.company, p.location, p.notes, p.hook].filter(Boolean).join(' ').toLowerCase();
+      if (haystack.includes(_searchQuery)) { card.classList.remove('filtered-out'); visible++; }
+      else { card.classList.add('filtered-out'); card.classList.remove('expanded'); card.querySelector('.card-body')?.classList.remove('visible'); }
+    });
+    noResults.classList.toggle('visible', visible === 0 && _searchQuery.length > 0);
+    document.getElementById('emptyState').style.display = (visible === 0 && _searchQuery.length === 0 && Object.keys(prospects).length === 0) ? 'block' : 'none';
+  }
+
+  function clearSearch() {
+    document.getElementById('prospectSearch').value = '';
+    searchProspects('');
+  }
   function saveNotes(id) { const ta = document.getElementById('notes-' + id); if (ta) { prospects[id].notes = ta.value; persistAll(); } }
   function saveGuidance(id) { const el = document.getElementById('guidance-' + id); if (el) { prospects[id].guidance = el.value; persistAll(); } }
   function saveEmpStatus(id, val) { prospects[id].empStatus = val; persistAll(); }
@@ -914,7 +1017,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
     const msgType = p.stage === 'new' ? 'first cold open message' : p.stage === 'messaging' ? `next message in the conversation` : p.stage === 'bridge' ? 'bridge message to get their phone number' : 'next message';
     const guidance = p.guidance?.trim(); const guidancePrompt = guidance ? `\n\nJosh's direction for this message: "${guidance}" — follow this guidance closely.` : '';
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const response = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 300, system: window._joshStyle || JOSH_STYLE,
           messages: [{ role: 'user', content: `${context}${guidancePrompt}\n\nWrite Josh's ${msgType} to ${p.fname}. Return ONLY the message text, nothing else.\n\nHARD RULE: Do NOT open with "I noticed you've been at [company]" or any variation.` }] }) });
       const data = await response.json(); if (data.error) throw new Error(data.error.message);
@@ -938,7 +1041,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
     const p = prospects[id]; if (!p) return; p._toneLoading = true; p.toneAnalysis = null; renderCardBody(id);
     let convo = ''; p.thread.forEach(m => { convo += m.type === 'sent' ? `Josh: ${m.text}\n` : `${p.fname}: ${m.text}\n`; });
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const response = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400,
           messages: [{ role: 'user', content: `You are a sales conversation analyst.\n\nProspect: ${p.name}, ${p.title || 'unknown'} at ${p.company || 'unknown'}\nStage: ${STAGES[p.stage]?.label || p.stage}\n\nConversation:\n${convo}\n\nTheir latest reply: "${replyText}"\n\nAnalyze their tone. Return ONLY JSON:\n{"tone":"positive|neutral|cautious|cold","reading":"2-3 sentences","approach":"1-2 sentences tactical advice"}` }] }) });
       const data = await response.json(); if (data.error) throw new Error(data.error.message);
@@ -1022,7 +1125,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
 
   // Modal
   function openModal() { document.getElementById('addProspectModal').classList.add('open'); document.getElementById('p-fname').focus(); }
-  function closeModal() { document.getElementById('addProspectModal').classList.remove('open'); clearUpload(null); clearResume(null); resetParseStatus(); switchUploadSource('linkedin'); }
+  function closeModal() { document.getElementById('addProspectModal').classList.remove('open'); clearUpload(null); clearResume(null); clearSalesNav(null); resetParseStatus(); switchUploadSource('linkedin'); }
   function closeModalOnBackdrop(e) { if (e.target === document.getElementById('addProspectModal')) closeModal(); }
   document.getElementById('addProspectBtn').onclick = openModal;
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
@@ -1038,10 +1141,222 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
   function switchUploadSource(src) {
     _uploadSource = src;
     document.querySelectorAll('.upload-source-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(src === 'linkedin' ? 'srcLinkedIn' : 'srcResume').classList.add('active');
+    const btnMap = { linkedin: 'srcLinkedIn', salesnav: 'srcSalesNav', resume: 'srcResume' };
+    document.getElementById(btnMap[src])?.classList.add('active');
     document.getElementById('uploadZone').style.display = src === 'linkedin' ? '' : 'none';
+    document.getElementById('salesNavZone').style.display = src === 'salesnav' ? '' : 'none';
     document.getElementById('resumeZone').style.display = src === 'resume' ? '' : 'none';
+    document.getElementById('bulkPreview').classList.remove('visible');
     resetParseStatus();
+  }
+
+  // Sales Nav upload
+  let salesNavBase64 = null;
+  let _bulkProspects = [];
+  const salesNavZone = document.getElementById('salesNavZone');
+  const salesNavInput = document.getElementById('salesNavInput');
+  const salesNavPreview = document.getElementById('salesNavPreview');
+  const salesNavActions = document.getElementById('salesNavActions');
+
+  salesNavZone.addEventListener('click', e => { if (!e.target.closest('button')) salesNavInput.click(); });
+  salesNavZone.addEventListener('dragover', e => { e.preventDefault(); salesNavZone.classList.add('dragover'); });
+  salesNavZone.addEventListener('dragleave', () => salesNavZone.classList.remove('dragover'));
+  salesNavZone.addEventListener('drop', e => { e.preventDefault(); salesNavZone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) handleSalesNavFile(f); });
+  salesNavInput.addEventListener('change', () => { if (salesNavInput.files[0]) handleSalesNavFile(salesNavInput.files[0]); });
+
+  let salesNavMediaType = 'image/png';
+  function handleSalesNavFile(file) {
+    salesNavMediaType = file.type && file.type.startsWith('image/') ? file.type : 'image/png';
+    const r = new FileReader();
+    r.onload = () => {
+      salesNavPreview.src = r.result;
+      salesNavBase64 = r.result.split(',')[1];
+      salesNavZone.classList.add('has-image');
+      salesNavActions.style.display = 'flex';
+    };
+    r.readAsDataURL(file);
+  }
+
+  function clearSalesNav(e) {
+    if (e) e.stopPropagation();
+    salesNavPreview.src = ''; salesNavBase64 = null;
+    salesNavZone.classList.remove('has-image');
+    salesNavActions.style.display = 'none';
+    salesNavInput.value = '';
+    clearBulkPreview();
+  }
+
+  function clearBulkPreview() {
+    _bulkProspects = []; _bulkUrls = [];
+    document.getElementById('bulkPreview').classList.remove('visible');
+    document.getElementById('bulkTableBody').innerHTML = '';
+    document.getElementById('bulkTableBody').style.display = '';
+    document.getElementById('bulkUrlList').style.display = 'none';
+    document.getElementById('bulkUrlLinks').innerHTML = '';
+    document.getElementById('bulkAddBtn').style.display = '';
+    document.getElementById('bulkAddOpenBtn').textContent = 'Add + Copy LinkedIn URLs →';
+    document.getElementById('bulkAddOpenBtn').onclick = function(){ bulkAddProspects(true); };
+  }
+
+  async function parseSalesNavList(e) {
+    if (e) e.stopPropagation(); if (!salesNavBase64) return;
+    const ps = document.getElementById('parseStatus'); const psText = document.getElementById('parseStatusText');
+    const btn = document.getElementById('salesNavParseBtn');
+
+    ps.className = 'parse-status loading'; ps.style.display = 'flex';
+    psText.textContent = 'Scanning list for prospects... (may take 10–20s)';
+    btn.disabled = true; btn.textContent = 'Scanning...';
+    ps.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    try {
+      // Promise.race gives us a timeout without AbortController (which can't be cloned in this env)
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('TIMEOUT')), 45000)
+      );
+      const apiFetch = fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514', max_tokens: 2000,
+          messages: [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: salesNavMediaType, data: salesNavBase64 } },
+            { type: 'text', text: 'This is a LinkedIn Sales Navigator lead list screenshot. Extract every visible person as a prospect.\n\nReturn ONLY a JSON array — no markdown, no explanation. Start with [ and end with ].\n\nFormat:\n[{"first_name":"","last_name":"","title":"","company":"","location":"","linkedin_url":""}]\n\nRules:\n- Extract every person row visible in the screenshot\n- first_name and last_name: split the full name\n- title: their job title (e.g. "Freight Broker", "Dispatch Manager")\n- company: their employer (e.g. "Coyote Logistics")\n- location: city/state/country as shown\n- linkedin_url: only if a full profile URL is clearly visible, otherwise use ""\n- Do NOT guess or fill in fields not visible\n- If a name is partially cut off, include what is visible' }
+          ]}]
+        })
+      });
+
+      const response = await Promise.race([apiFetch, timeout]);
+      const data = await response.json();
+      if (data.error) throw new Error('API: ' + data.error.message);
+
+      const raw = data.content.map(i => i.text || '').join('\n');
+      console.log('Sales Nav raw:', raw);
+
+      let parsed;
+      try { parsed = JSON.parse(raw.replace(/```json|```/g, '').trim()); }
+      catch { const match = raw.match(/\[[\s\S]*\]/); if (match) parsed = JSON.parse(match[0]); else throw new Error('Unexpected AI response format'); }
+
+      if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('No prospects found — try a clearer or less zoomed-out screenshot');
+
+      _bulkProspects = parsed.map((p, i) => ({ ...p, _id: 'bulk_' + i, _selected: true }));
+      renderBulkPreview();
+      ps.className = 'parse-status success';
+      psText.textContent = '✓ Found ' + _bulkProspects.length + ' prospect' + (_bulkProspects.length !== 1 ? 's' : '') + ' — review and add below.';
+
+    } catch (err) {
+      ps.className = 'parse-status error';
+      psText.textContent = err.message === 'TIMEOUT'
+        ? 'Timed out — try a cropped or smaller screenshot'
+        : 'Failed: ' + (err.message || 'unknown error');
+      console.error('Sales Nav parse error:', err);
+    } finally {
+      btn.disabled = false; btn.textContent = '⚡ Extract Prospects';
+    }
+  }
+
+  function renderBulkPreview() {
+    const tbody = document.getElementById('bulkTableBody');
+    tbody.innerHTML = '';
+    let dupeCount = 0;
+    _bulkProspects.forEach((p, i) => {
+      const fullName = ((p.first_name || '') + ' ' + (p.last_name || '')).trim().toLowerCase();
+      const isDupe = Object.values(prospects).some(ex => (ex.fname + ' ' + ex.lname).trim().toLowerCase() === fullName);
+      if (isDupe) { dupeCount++; p._selected = false; }
+      const tr = document.createElement('tr');
+      tr.id = 'bulk-row-' + i;
+      if (!p._selected) tr.classList.add('deselected');
+      tr.innerHTML = `<td class="bulk-row-check"><input type="checkbox" ${p._selected ? 'checked' : ''} onchange="toggleBulkRow(${i}, this.checked)" /></td>
+        <td><span class="bulk-row-name">${p.first_name || ''} ${p.last_name || ''}</span>${isDupe ? '<span class="bulk-dupe-badge">already added</span>' : ''}</td>
+        <td>${p.title || '<span style="color:var(--text3)">—</span>'}</td>
+        <td>${p.company || '<span style="color:var(--text3)">—</span>'}</td>
+        <td>${p.location || '<span style="color:var(--text3)">—</span>'}</td>`;
+      tbody.appendChild(tr);
+    });
+    const selected = _bulkProspects.filter(p => p._selected).length;
+    document.getElementById('bulkPreviewTitle').textContent = _bulkProspects.length + ' prospects found';
+    document.getElementById('bulkSummary').textContent = selected + ' selected to add' + (dupeCount > 0 ? ' · ' + dupeCount + ' already in your pipeline (auto-deselected)' : '');
+    document.getElementById('bulkPreview').classList.add('visible');
+  }
+
+  function toggleBulkRow(i, checked) {
+    _bulkProspects[i]._selected = checked;
+    const row = document.getElementById('bulk-row-' + i);
+    row.classList.toggle('deselected', !checked);
+    const selected = _bulkProspects.filter(p => p._selected).length;
+    document.getElementById('bulkSummary').textContent = selected + ' selected to add';
+    document.getElementById('bulkAddOpenBtn').textContent = 'Add ' + selected + ' + Open LinkedIn Tabs →';
+  }
+
+  function bulkSelectAll(state) {
+    _bulkProspects.forEach((p, i) => {
+      p._selected = state;
+      const row = document.getElementById('bulk-row-' + i);
+      row.classList.toggle('deselected', !state);
+      const cb = row.querySelector('input[type=checkbox]'); if (cb) cb.checked = state;
+    });
+    const selected = _bulkProspects.filter(p => p._selected).length;
+    document.getElementById('bulkSummary').textContent = selected + ' selected to add';
+    document.getElementById('bulkAddOpenBtn').textContent = 'Add ' + selected + ' + Open LinkedIn Tabs →';
+  }
+
+  let _bulkUrls = [];
+
+  function bulkAddProspects(showUrls) {
+    const toAdd = _bulkProspects.filter(p => p._selected);
+    if (toAdd.length === 0) return;
+    _bulkUrls = [];
+    toAdd.forEach(p => {
+      const fname = (p.first_name || '').trim(); const lname = (p.last_name || '').trim();
+      if (!fname) return;
+      const id = 'card' + cardCounter;
+      const initials = ((fname[0] || '?') + (lname[0] || '')).toUpperCase();
+      const avatarBg = AVATAR_COLORS[cardCounter % AVATAR_COLORS.length];
+      const si = STAGES.new; const sc = SCORES.cold;
+      prospects[id] = { name: fname + ' ' + lname, fname, lname, linkedin: p.linkedin_url || '', title: p.title || '', company: p.company || '', location: p.location || '', tenure: '', score: 'cold', stage: 'new', hook: '', draft: '', phone: '', notes: '', guidance: '', empStatus: '', numberRequested: false, numberDeclined: false, toneAnalysis: null, thread: [], stageHistory: [{ stage: 'new', time: now() }], debriefs: [] };
+      const card = document.createElement('div'); card.className = 'prospect-card'; card.id = id;
+      card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + fname + ' ' + lname + '</div><div class="card-meta">' + [p.title, p.company, p.location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div><button class="btn-li-icon" onclick="event.stopPropagation(); openLinkedIn(\'' + id + '\')" title="' + (p.linkedin_url ? 'Open LinkedIn profile' : 'Search on LinkedIn') + '">' + (p.linkedin_url ? '🔗' : '🔍') + '</button></div></div><div class="card-body"></div>';
+      document.querySelector('.queue').appendChild(card); cardCounter++;
+      renderCardBody(id);
+      // Build URL list for the copy panel
+      if (showUrls) {
+        const url = (p.linkedin_url && p.linkedin_url.startsWith('http'))
+          ? p.linkedin_url
+          : 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent([fname + ' ' + lname, p.title, p.company].filter(Boolean).join(' '));
+        _bulkUrls.push({ name: fname + ' ' + lname, url });
+      }
+    });
+    document.getElementById('searchWrap').style.display = 'block';
+    document.getElementById('emptyState').style.display = 'none';
+    updateSidebarCounts();
+    persistAll();
+    logActivity('📋 ' + toAdd.length + ' prospects added from Sales Navigator', 'var(--accent)');
+    const af = document.querySelector('.stage-item.active'); if (af) filterStage(af);
+
+    if (showUrls && _bulkUrls.length > 0) {
+      // Show URL list in the modal — don't close yet
+      const container = document.getElementById('bulkUrlLinks');
+      container.innerHTML = _bulkUrls.map((item, i) =>
+        `<a href="${item.url}" target="_blank" rel="noopener" style="font-size:10px;color:var(--accent);text-decoration:none;padding:4px 8px;background:var(--surface);border:1px solid var(--border);border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;" title="${item.url}">${i + 1}. ${item.name}</a>`
+      ).join('');
+      document.getElementById('bulkUrlList').style.display = 'block';
+      // Hide the add buttons since we're done adding
+      document.getElementById('bulkAddBtn').style.display = 'none';
+      document.getElementById('bulkAddOpenBtn').textContent = '✓ Added — close when done';
+      document.getElementById('bulkAddOpenBtn').onclick = closeModal;
+      document.getElementById('bulkTableBody').style.display = 'none';
+    } else {
+      closeModal();
+    }
+  }
+
+  function copyAllLinkedInUrls() {
+    const text = _bulkUrls.map(item => item.name + '\n' + item.url).join('\n\n');
+    doCopy(text).then(() => {
+      const btn = document.querySelector('#bulkUrlList .btn-ghost');
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied!'; btn.style.color = 'var(--accent)';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+    });
   }
 
   uploadZone.addEventListener('click', e => { if (!e.target.closest('button')) screenshotInput.click(); });
@@ -1081,7 +1396,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
     const ps = document.getElementById('parseStatus'); const psText = document.getElementById('parseStatusText'); const parseBtn = document.getElementById('parseBtn');
     ps.className = 'parse-status loading'; psText.textContent = 'Analyzing LinkedIn screenshot...'; parseBtn.disabled = true; parseBtn.textContent = 'Parsing...';
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const response = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000,
           messages: [{ role: 'user', content: [
             { type: 'image', source: { type: 'base64', media_type: 'image/png', data: uploadedImageBase64 } },
@@ -1104,7 +1419,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
     ps.className = 'parse-status loading'; psText.textContent = 'Analyzing resume...'; btn.disabled = true; btn.textContent = 'Parsing...';
     try {
       const contentBlock = resumeMediaType === 'application/pdf' ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: resumeBase64 } } : { type: 'image', source: { type: 'base64', media_type: resumeMediaType, data: resumeBase64 } };
-      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const response = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000,
           messages: [{ role: 'user', content: [ contentBlock,
             { type: 'text', text: 'Extract info from this resume for freight brokerage recruiting. Return ONLY JSON:\n{"first_name":"","last_name":"","title":"most recent","company":"most recent","location":"","tenure":"total years in freight/logistics/sales","score":"cold","hook":"what makes them interesting for freight recruiting","draft_message":"","emp_status":"current_agent|w2_broker|other"}\n\nExtract ONLY what is clearly on the resume. Empty string if not visible.' }
@@ -1132,8 +1447,9 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
     const avatarBg = AVATAR_COLORS[cardCounter % AVATAR_COLORS.length]; const si = STAGES[stage] || STAGES.new; const sc = SCORES[score] || SCORES.warm;
     prospects[id] = { name: fname + ' ' + lname, fname, lname, linkedin, title, company, location, tenure, score, stage, hook, draft: msg, phone: '', notes: '', guidance: '', empStatus: '', numberRequested: false, numberDeclined: false, toneAnalysis: null, thread: [], stageHistory: [{ stage, time: now() }], debriefs: [] };
     const card = document.createElement('div'); card.className = 'prospect-card'; card.id = id;
-    card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + fname + ' ' + lname + '</div><div class="card-meta">' + [title, company, location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (tenure ? '<div class="card-tenure">' + tenure + ' tenure</div>' : '') + '</div></div><div class="card-body"></div>';
+    card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + fname + ' ' + lname + '</div><div class="card-meta">' + [title, company, location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (tenure ? '<div class="card-tenure">' + tenure + ' tenure</div>' : '') + '<button class="btn-li-icon" onclick="event.stopPropagation(); openLinkedIn(\'' + id + '\')" title="' + (linkedin ? 'Open LinkedIn profile' : 'Search on LinkedIn') + '">' + (linkedin ? '🔗' : '🔍') + '</button></div></div><div class="card-body"></div>';
     document.querySelector('.queue').appendChild(card); cardCounter++; renderCardBody(id);
+    document.getElementById('searchWrap').style.display = 'block';
     ['p-fname','p-lname','p-linkedin','p-title','p-company','p-location','p-tenure','p-hook','p-msg'].forEach(fid => { const el = document.getElementById(fid); el.value = ''; el.style.borderColor = ''; });
     document.getElementById('p-score').value = 'cold'; document.getElementById('p-stage').value = 'new';
     closeModal(); logActivity(fname + ' ' + lname + ' added → ' + si.label, 'var(--accent)'); updateSidebarCounts(); document.getElementById('emptyState').style.display = 'none';
@@ -1187,7 +1503,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
     Object.entries(counts).forEach(([k, v]) => { if (v > 0) context += '- ' + (STAGES[k]?.label) + ': ' + v + '\n'; });
     context += '\nDetailed:\n'; all.forEach(p => { const sent = p.thread.filter(m => m.type === 'sent').length; const received = p.thread.filter(m => m.type === 'received').length; context += '\n' + p.name + ' (' + (STAGES[p.stage]?.label) + ', ' + p.score + '): ' + sent + ' sent, ' + received + ' received'; if (p.toneAnalysis) context += ', tone: ' + p.toneAnalysis.tone; if (p.notes) context += ', notes: ' + p.notes; });
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const response = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600,
           messages: [{ role: 'user', content: 'You are a sales coach reviewing a freight brokerage recruiter\'s daily pipeline. Be direct and actionable.\n\n' + context + '\n\nGive a brief daily coaching summary: WINS, WATCH, NEXT MOVES (name the prospect), PATTERNS, ONE TIP. Keep it conversational.' }] }) });
       const data = await response.json(); if (data.error) throw new Error(data.error.message);
@@ -1243,7 +1559,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
     if (rules) system += 'RULES:\n' + rules + '\n\n';
     system += 'When writing LinkedIn posts: punchy, authentic, no hashtag spam. Short paragraphs.\nIMPORTANT: If request is vague — ask before writing.';
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const response = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, system: system, messages: vlChatHistory }) });
       const data = await response.json(); if (data.error) throw new Error(data.error.message);
       const reply = data.content.map(i => i.text || '').join('\n').trim(); vlChatHistory.push({ role: 'assistant', content: reply });
@@ -1305,7 +1621,7 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
       .replace(/\n{3,}/g, '\n\n')
       .trim(); }
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/claude', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1437,10 +1753,12 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
         prospects[id] = p;
         const initials = ((p.fname || '?')[0] + ((p.lname || '')[0] || '')).toUpperCase(); const avatarBg = AVATAR_COLORS[parseInt(id.replace('card','')) % AVATAR_COLORS.length]; const si = STAGES[p.stage] || STAGES.new; const sc = SCORES[p.score] || SCORES.cold;
         const card = document.createElement('div'); card.className = 'prospect-card'; card.id = id; card.style.animationDelay = '0s';
-        card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + p.fname + ' ' + p.lname + '</div><div class="card-meta">' + [p.title, p.company, p.location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (p.tenure ? '<div class="card-tenure">' + p.tenure + ' tenure</div>' : '') + '</div></div><div class="card-body"></div>';
+        card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + p.fname + ' ' + p.lname + '</div><div class="card-meta">' + [p.title, p.company, p.location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (p.tenure ? '<div class="card-tenure">' + p.tenure + ' tenure</div>' : '') + '<button class="btn-li-icon" onclick="event.stopPropagation(); openLinkedIn(\'' + id + '\')" title="' + (p.linkedin ? 'Open LinkedIn profile' : 'Search on LinkedIn') + '">' + (p.linkedin ? '🔗' : '🔍') + '</button></div></div><div class="card-body"></div>';
         document.querySelector('.queue').appendChild(card); renderCardBody(id);
       }
-      document.getElementById('emptyState').style.display = Object.keys(data.prospects).length > 0 ? 'none' : 'block';
+      const hasProspects = Object.keys(data.prospects).length > 0;
+      document.getElementById('emptyState').style.display = hasProspects ? 'none' : 'block';
+      document.getElementById('searchWrap').style.display = hasProspects ? 'block' : 'none';
     }
   }
 
@@ -1500,14 +1818,23 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
   async function loadFromCloud() {
     if (!window.storage) return null;
     try {
-      const result = await window.storage.get('agient_backup');
+      // 5 second timeout — if storage doesn't respond, fall back to localStorage immediately
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 5000));
+      const cloudFetch = window.storage.get('agient_backup');
+      const result = await Promise.race([cloudFetch, timeout]);
       if (result && result.value) {
         const data = JSON.parse(result.value);
         _cloudAvailable = true;
         console.log('☁️ Cloud backup found —', data._prospectCount || '?', 'prospects, saved', data._savedAt || 'unknown');
         return data;
       }
-    } catch (e) { console.warn('Cloud load failed:', e); }
+    } catch (e) {
+      if (e.message === 'TIMEOUT') {
+        console.warn('☁️ Cloud storage timed out — falling back to localStorage');
+      } else {
+        console.warn('Cloud load failed:', e);
+      }
+    }
     return null;
   }
 
@@ -1603,10 +1930,11 @@ open with something PERSONAL — a shared interest, their city, a post they wrot
           prospects[id] = p;
           const initials = ((p.fname || '?')[0] + ((p.lname || '')[0] || '')).toUpperCase(); const avatarBg = AVATAR_COLORS[parseInt(id.replace('card','')) % AVATAR_COLORS.length]; const si = STAGES[p.stage] || STAGES.new; const sc = SCORES[p.score] || SCORES.cold;
           const card = document.createElement('div'); card.className = 'prospect-card'; card.id = id; card.style.animationDelay = '0s';
-          card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + p.fname + ' ' + p.lname + '</div><div class="card-meta">' + [p.title, p.company, p.location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (p.tenure ? '<div class="card-tenure">' + p.tenure + ' tenure</div>' : '') + '</div></div><div class="card-body"></div>';
+          card.innerHTML = '<div class="card-header" onclick="toggleCard(\'' + id + '\')"><div class="prospect-avatar" style="background: ' + avatarBg + ';">' + initials + '</div><div class="card-info"><div class="card-name">' + p.fname + ' ' + p.lname + '</div><div class="card-meta">' + [p.title, p.company, p.location].filter(Boolean).join(' — ') + '</div></div><div class="card-right"><span class="score-badge ' + sc.cls + '">' + sc.badge + '</span><div class="status-chip ' + si.cls + '">' + si.label + '</div>' + (p.tenure ? '<div class="card-tenure">' + p.tenure + ' tenure</div>' : '') + '<button class="btn-li-icon" onclick="event.stopPropagation(); openLinkedIn(\'' + id + '\')" title="' + (p.linkedin ? 'Open LinkedIn profile' : 'Search on LinkedIn') + '">' + (p.linkedin ? '🔗' : '🔍') + '</button></div></div><div class="card-body"></div>';
           document.querySelector('.queue').appendChild(card); renderCardBody(id);
         }
         document.getElementById('emptyState').style.display = Object.keys(data).length > 0 ? 'none' : 'block';
+        if (Object.keys(data).length > 0) document.getElementById('searchWrap').style.display = 'block';
         console.log('💾 Loaded from localStorage');
         updateSyncStatus(_cloudAvailable ? 'saved' : 'local', _cloudAvailable ? 'Synced' : 'Local only');
         // Sync local data up to cloud
